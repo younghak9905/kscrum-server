@@ -1,0 +1,21 @@
+tmdb:
+  api:
+    key: ${tmdb.api.key}
+    baseurl: https://api.themoviedb.org/3
+
+
+springdoc:
+  swagger-ui:
+    base-url: /swagger-ui/index.html
+    disable-swagger-default-url: true
+
+    # path: /api
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /api/swagger.json
+    groups:
+      enabled: true
+  cache:
+    disabled: true
+

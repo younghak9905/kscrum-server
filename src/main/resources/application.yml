@@ -1,0 +1,17 @@
+server:
+    port: 8080
+    tomcat:
+        access-log:
+            enabled: true
+            directory: logs
+            prefix: access_log
+            suffix: .access.log
+        basedir: .
+
+spring:
+    profiles:
+        default: local
+    servlet:
+        multipart:
+            maxFileSize: 100MB
+            maxRequestSize: 100MB

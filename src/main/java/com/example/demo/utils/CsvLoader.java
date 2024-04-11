@@ -38,10 +38,9 @@ public class CsvLoader implements CommandLineRunner {
 
 
     @Override
-    @Transactional
     public void run(String... args) throws Exception {
         loadMovies();
-        loadLinks();
+        //loadLinks();
     }
 
     private void loadMovies() throws Exception {
@@ -60,9 +59,10 @@ public class CsvLoader implements CommandLineRunner {
                 movie.setTitle(nextLine[1].trim());
                 movie.setGenres(nextLine[2].trim());
                 batch.add(movie);
-
+                System.out.println(movie.getTitle());
                 // 100개 단위로 저장
                 if (batch.size() == 100) {
+                    System.out.println("!!!batch size: " + batch.size()+"\n\n\n\n\n\n");
                     movieRepository.saveAll(batch);
                     batch.clear(); // 저장 후 리스트 초기화
                 }

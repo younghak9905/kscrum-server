@@ -19,13 +19,6 @@ public class Movie {
     private String title;
     private String genres;
 
-    public Movie(Long movieId)
-    {
-        this.movieId = movieId;
-    }
-    public Movie()
-    {
 
-    }
 }
 

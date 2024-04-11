@@ -3,19 +3,22 @@ package com.example.demo.controller;
 import com.example.demo.domain.dto.MovieDto;
 import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.dto.MovieResponseDto;
+import com.example.demo.repository.MovieRepository;
 import com.example.demo.service.TmdbClient;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/movie")
+@RequiredArgsConstructor
 public class MovieController {
 
     private final TmdbClient tmdbClient;
 
-    public MovieController(TmdbClient tmdbClient) {
-        this.tmdbClient = tmdbClient;
-    }
+    private final MovieRepository movieRepository;
+
+
 
     @GetMapping("/search")
     public ResponseEntity<MovieResponseDto> searchMovies(@RequestParam String query) {
@@ -38,5 +41,11 @@ public class MovieController {
                 .build();
 
         return ResponseEntity.ok(posterDto);
+    }
+
+    @DeleteMapping()
+    public ResponseEntity<Void> deleteMovie() {
+        movieRepository.deleteAll();
+        return ResponseEntity.ok().build();
     }
 }

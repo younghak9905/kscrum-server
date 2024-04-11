@@ -10,12 +10,22 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "movies",indexes = {
+@Table(name = "movies")/*,indexes = {
         @Index(name = "idx_movies_title", columnList = "title")
-})
+})*/
 public class Movie {
     @Id
     private Long movieId;
     private String title;
     private String genres;
+
+    public Movie(Long movieId)
+    {
+        this.movieId = movieId;
+    }
+    public Movie()
+    {
+
+    }
 }
+

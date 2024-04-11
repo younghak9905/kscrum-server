@@ -28,4 +28,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+      jdbc:
+        batch_size: 50
+      order_inserts: true
+      order_updates: true
+      batch_versioned_data: true
     show-sql: true

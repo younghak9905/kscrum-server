@@ -43,7 +43,6 @@ public class CsvLoader implements CommandLineRunner {
         loadMovies();
         loadLinks();
     }
-
     private void loadMovies() throws Exception {
         Resource resource = new ClassPathResource("data/movies.csv");
         try (Reader reader = new InputStreamReader(resource.getInputStream());
@@ -51,16 +50,19 @@ public class CsvLoader implements CommandLineRunner {
 
             List<Movie> movies = new ArrayList<>();
             String[] nextLine;
+
+            // Read and discard the header row.
+            csvReader.readNext();
+
+            // Read data rows.
             while ((nextLine = csvReader.readNext()) != null) {
-                if (nextLine != csvReader.peek()) {
-                    Movie movie = new Movie();
-                    movie.setMovieId(Long.parseLong(nextLine[0].trim()));
-                    movie.setTitle(nextLine[1].trim());
-                    movie.setGenres(nextLine[2].trim());
-                    movies.add(movie);
-                }
+                Movie movie = new Movie();
+                movie.setMovieId(Long.parseLong(nextLine[0].trim()));
+                movie.setTitle(nextLine[1].trim());
+                movie.setGenres(nextLine[2].trim());
+                movies.add(movie);
             }
-            movieRepository.saveAll(movies); // 배치 저장
+            movieRepository.saveAll(movies); // Batch save
         } catch (CsvException | IOException e) {
             e.printStackTrace();
         }

@@ -75,10 +75,10 @@ public class CsvLoader implements CommandLineRunner {
             csvReader.readNext(); // 첫 번째 라인은 헤더라서 건너뜁니다.
             while ((nextLine = csvReader.readNext()) != null) {
                 Long movieId = Long.parseLong(nextLine[0].trim());
-                Optional<Movie> movie = movieRepository.findById(movieId);
-                if (movie.isPresent()) {
+                Movie movie = movieRepository.findById(movieId).orElse(null);
+                if (movie != null) {
                     Links link = new Links();
-                    link.setMovieId(movie.get());
+                    link.setMovieId(movie);
                     link.setImdbId(Long.parseLong(nextLine[1].trim()));
                     link.setTmdbId(Long.parseLong(nextLine[2].trim()));
                     linksList.add(link);

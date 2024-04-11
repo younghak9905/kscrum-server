@@ -1,9 +1,6 @@
 package com.example.demo.domain.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +11,11 @@ import lombok.Setter;
         @Index(name = "idx_movies_title", columnList = "title")
 })*/
 public class Movie {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+
     private Long movieId;
     private String title;
     private String genres;

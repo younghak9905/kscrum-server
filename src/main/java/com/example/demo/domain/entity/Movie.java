@@ -13,9 +13,6 @@ import lombok.Setter;
 public class Movie {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-
     private Long movieId;
     private String title;
     private String genres;

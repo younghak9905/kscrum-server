@@ -48,10 +48,11 @@ public class CsvLoader implements CommandLineRunner {
              CSVReader csvReader = new CSVReader(reader)) {
 
             List<Movie> batch = new ArrayList<>();
+
             String[] nextLine;
             // 첫 번째 행(헤더)을 읽어서 건너뜁니다.
             csvReader.readNext();
-
+            int i=1;
             while ((nextLine = csvReader.readNext()) != null) {
                 Movie movie = new Movie();
                 movie.setMovieId(Long.parseLong(nextLine[0].trim()));
@@ -60,7 +61,7 @@ public class CsvLoader implements CommandLineRunner {
                 batch.add(movie);
                 // 100개 단위로 저장
                 if (batch.size() == 100) {
-                    System.out.println("movie!!!batch size: " + batch.size()+"\n\n\n\n\n\n");
+                    System.out.println("movie!!!batch size: " + batch.size()*i+"\n\n\n\n\n\n");
                     movieRepository.saveAll(batch);
                     batch.clear(); // 저장 후 리스트 초기화
                 }
@@ -83,7 +84,7 @@ public class CsvLoader implements CommandLineRunner {
 
             List<Links> batch = new ArrayList<>();
             csvReader.readNext(); // 첫 번째 행(헤더)을 읽어서 건너뜁니다.
-
+            int i=1;
             String[] nextLine;
             while ((nextLine = csvReader.readNext()) != null) {
                 Long movieId = Long.parseLong(nextLine[0].trim());
@@ -97,9 +98,10 @@ public class CsvLoader implements CommandLineRunner {
 
                     // 100개 단위로 저장
                     if (batch.size() == 100) {
-                        System.out.println("links!!!batch size: " + batch.size()+"\n\n\n\n\n\n");
+                        System.out.println("links!!!batch size: " + batch.size()*i+"\n\n\n\n\n\n");
                         linksRepository.saveAll(batch);
                         batch.clear(); // 저장 후 리스트 초기화
+                        i++;
                     }
                 }
             }

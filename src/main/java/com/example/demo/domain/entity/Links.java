@@ -8,7 +8,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "links",indexes = {
-        @Index(name = "idx_tmdb_link", columnList = "tmdbId"),
+        @Index(name = "idx_movie_id", columnList = "movie_id"), // 'movie_id' 컬럼에 대한 인덱스
+        @Index(name = "idx_tmdb_id", columnList = "tmdbId") // 'tmdbId' 컬럼에 대한 인덱스
 })
 public class Links {
     @Id

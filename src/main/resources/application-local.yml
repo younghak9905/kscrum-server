@@ -19,3 +19,18 @@ springdoc:
   cache:
     disabled: true
 
+spring:
+  datasource:
+    url: ${DB.URL}
+    username: ${DB.USERNAME}
+    password: ${DB.PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+      jdbc:
+        batch_size: 50
+      order_inserts: true
+      order_updates: true
+      batch_versioned_data: true
+    show-sql: false

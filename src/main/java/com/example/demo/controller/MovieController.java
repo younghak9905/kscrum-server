@@ -4,6 +4,7 @@ import com.example.demo.domain.dto.MovieDto;
 import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.dto.MovieResponseDto;
 import com.example.demo.repository.MovieRepository;
+import com.example.demo.service.MovieService;
 import com.example.demo.service.TmdbClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,8 @@ public class MovieController {
     private final TmdbClient tmdbClient;
 
     private final MovieRepository movieRepository;
+
+    private final MovieService movieService;
 
 
 
@@ -46,6 +49,18 @@ public class MovieController {
     @DeleteMapping()
     public ResponseEntity<Void> deleteMovie() {
         movieRepository.deleteAll();
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/update/years")
+    public ResponseEntity<Void> updateMovieYears() {
+        movieService.updateMovieYearsBatchAsync();
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/update/genres")
+    public ResponseEntity<Void> updateMovieGenres() {
+        movieService.processMoviesAsync();
         return ResponseEntity.ok().build();
     }
 }

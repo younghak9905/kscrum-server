@@ -23,3 +23,4 @@ services:
       - DB.URL=${DB_URL}
       - DB.USERNAME=${DB_USERNAME}
       - DB.PASSWORD=${DB_PASSWORD}
+    restart: always

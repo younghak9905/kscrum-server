@@ -78,7 +78,7 @@ public class MovieService {
         long totalMovies = movieRepository.count();
         int totalPages = (int) Math.ceil((double) totalMovies / pageSize);
 
-        for (int page = 0; page < totalPages; page++) {
+        for (int page = 50; page < totalPages; page++) {
             Pageable pageable = PageRequest.of(page, pageSize);
             Page<Movie> moviePage = movieRepository.findAll(pageable);
 

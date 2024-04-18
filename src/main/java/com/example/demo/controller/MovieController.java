@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.domain.dto.MovieChoiceRequestDto;
 import com.example.demo.domain.dto.MovieDto;
 import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.dto.MovieResponseDto;
@@ -61,6 +62,12 @@ public class MovieController {
     @PostMapping("/update/genres")
     public ResponseEntity<Void> updateMovieGenres() {
         movieService.processMoviesAsync();
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/choice")
+    public ResponseEntity<Void> choiceMovie(@RequestBody MovieChoiceRequestDto dto) {
+        movieService.choiceMovie(dto);
         return ResponseEntity.ok().build();
     }
 }

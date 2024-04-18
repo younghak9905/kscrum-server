@@ -20,4 +20,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     @Query(value = "SELECT * FROM movies m LIMIT :batchSize OFFSET :offset", nativeQuery = true)
     List<Movie> findMoviesWithLimitOffset(@Param("batchSize") int batchSize, @Param("offset") int offset);
+
+    List<Movie> findByMovieIdIn(List<Long> movieIds);
 }

@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.domain.dto.MovieChoiceRequestDto;
 import com.example.demo.domain.entity.Genre;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.domain.entity.MovieGenre;
@@ -128,6 +129,16 @@ public class MovieService {
         });
 
         movieGenreRepository.saveAll(movieGenres);
+    }
+
+    public void choiceMovie(MovieChoiceRequestDto dto) {
+        List<Long> movieIds = dto.getMovieIds();
+        List<Movie> movies = movieRepository.findByMovieIdIn(movieIds);
+
+        // 이후 ML 서버 API 호출하여 영화 추천 결과를 받아옵니다.
+        //결과를 받아오는 것은 비동기 처리
+
+
     }
 }
 

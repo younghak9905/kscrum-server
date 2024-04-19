@@ -8,19 +8,23 @@ import com.example.demo.repository.GenreRepository;
 import com.example.demo.repository.MovieGenreRepository;
 import com.example.demo.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,13 +37,13 @@ public class MovieService {
 
     private final MovieGenreRepository movieGenreRepository;
 
-    public Movie getMovieByMovieId(Long movieId)
-    {
+
+    private final WebClient webClient;
+
+
+    public Movie getMovieByMovieId(Long movieId) {
         return movieRepository.findByMovieId(movieId).orElse(null);
     }
-
-
-
 
 
     public void updateMovieYearsBatchAsync() {
@@ -70,7 +74,6 @@ public class MovieService {
         System.out.println("page: " + page + ", offset: " + offset + ", movies: " + movies.size());
         movieRepository.saveAll(movies);
     }
-
 
 
     @Async
@@ -134,13 +137,49 @@ public class MovieService {
     public void choiceMovie(MovieChoiceRequestDto dto) {
         List<Long> movieIds = dto.getMovieIds();
         List<Movie> movies = movieRepository.findByMovieIdIn(movieIds);
+        List<String> movieTitles = new ArrayList<>();
+        for (Movie movie : movies) {
+            movieTitles.add(movie.getTitle());
+        }
 
-        // 이후 ML 서버 API 호출하여 영화 추천 결과를 받아옵니다.
-        //결과를 받아오는 것은 비동기 처리
+        getRecommendationsAsync(movieTitles).thenAccept(recommendations -> {
+            System.out.println("Recommendations: " + recommendations);
 
+            // 비동기적으로 받은 추천 영화 처리
+            updateMoviePriorities(recommendations);
+        });
+    }
+
+
+    @Async
+    public CompletableFuture<List<String>> getRecommendationsAsync(List<String> movieTitles) {
+        String url = "/api/recommendation";
+        System.out.println("Calling API URL: " + url);
+
+        return webClient.post()
+                .uri(url)
+                .bodyValue(movieTitles)
+                .retrieve()
+                .onStatus(
+                        status -> status.is4xxClientError() || status.is5xxServerError(),
+                        response -> Mono.error(new RuntimeException("API call failed with status: " + response.statusCode()))
+                )
+                .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                .doOnError(error -> System.out.println("API call error: " + error.getMessage()))
+                .toFuture();
+    }
+
+    @Async
+    public void updateMoviePriorities(List<String> recommendations) {
+        List<Movie> movies = movieRepository.findByTitleIn(recommendations);
+        movies.forEach(movie -> {
+            movie.setPriority(movie.getPriority() == null ? 1 : movie.getPriority() + 1);
+            movie.setUpdateDate(LocalDateTime.now());
+            System.out.println("Movie: " + movie.getTitle() + ", Priority: " + movie.getPriority());
+        });
+        movieRepository.saveAll(movies);
 
     }
 }
-
 
 

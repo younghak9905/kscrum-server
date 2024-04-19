@@ -24,4 +24,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findByMovieIdIn(List<Long> movieIds);
 
     List<Movie> findByTitleIn(List<String> recommendations);
+
+    @Query(value = "SELECT m FROM Movie m ORDER BY RAND() LIMIT 4")
+    List<Movie> findRandomMovie();
 }

@@ -7,6 +7,7 @@ import com.example.demo.domain.entity.Links;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.domain.entity.MovieGenre;
 import com.example.demo.repository.GenreRepository;
+import com.example.demo.repository.LinksRepository;
 import com.example.demo.repository.MovieGenreRepository;
 import com.example.demo.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
@@ -189,9 +190,9 @@ public class MovieService {
 
         List<MoviePosterDto> moviePosterDtos = new ArrayList<>();
         for(Movie movie : randomMovies) {
-            Long tmdbId = linksRepository.findTmdbIdByMovieId(movie).get(0).getTmdbId();
+            Long tmdbId =getTmdbId(movie);
             System.out.println("tmdbId = " + tmdbId);
-            MoviePosterDto moviePosterDto = tmdbClient.searchMoviePoster(Long.toString(tmdbId));
+            MoviePosterDto moviePosterDto = tmdbClient.searchMoviePoster(tmdbId);
             moviePosterDtos.add(moviePosterDto);
         }
         return moviePosterDtos;

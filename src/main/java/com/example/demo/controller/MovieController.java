@@ -79,4 +79,4 @@ public class MovieController {
         return ResponseEntity.ok(movieService.getMovies(page, size));
     }
 }
-}
+

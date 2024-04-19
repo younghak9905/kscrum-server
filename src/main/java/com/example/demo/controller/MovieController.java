@@ -1,10 +1,15 @@
 package com.example.demo.controller;
 
-import com.example.demo.domain.dto.*;
+import com.example.demo.domain.dto.MovieChoiceRequestDto;
+import com.example.demo.domain.dto.MovieDto;
+import com.example.demo.domain.dto.MoviePosterDto;
+import com.example.demo.domain.dto.MovieResponseDto;
+import com.example.demo.domain.entity.Movie;
 import com.example.demo.repository.MovieRepository;
 import com.example.demo.service.MovieService;
 import com.example.demo.service.TmdbClient;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,4 +72,11 @@ public class MovieController {
     public ResponseEntity<List<MoviePosterDto>> choiceMovie() {
         return ResponseEntity.ok(movieService.choiceRandomMovies());
     }
+
+    @GetMapping("/posters")
+    public ResponseEntity<List<MoviePosterDto>> listMovies(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                           @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok(movieService.getMovies(page, size));
+    }
+}
 }

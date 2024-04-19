@@ -5,8 +5,8 @@ import com.example.demo.domain.entity.Movie;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-
+import java.util.Optional;
 
 public interface LinksRepository extends JpaRepository<Links, Long> {
-    List<Links> findTmdbIdByMovieId (Movie movie);
+    Optional<Links> findByMovieId(Movie movieId);
 }

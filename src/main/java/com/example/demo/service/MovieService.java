@@ -2,13 +2,11 @@ package com.example.demo.service;
 
 import com.example.demo.domain.dto.MovieChoiceRequestDto;
 import com.example.demo.domain.dto.MoviePosterDto;
-import com.example.demo.domain.dto.MovieResponseDto;
 import com.example.demo.domain.entity.Genre;
 import com.example.demo.domain.entity.Links;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.domain.entity.MovieGenre;
 import com.example.demo.repository.GenreRepository;
-import com.example.demo.repository.LinksRepository;
 import com.example.demo.repository.MovieGenreRepository;
 import com.example.demo.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +26,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -196,6 +195,35 @@ public class MovieService {
             moviePosterDtos.add(moviePosterDto);
         }
         return moviePosterDtos;
+    }
+
+
+    public Page<Movie> getMovies(Pageable pageable) {
+        return movieRepository.findAll(pageable);
+    }
+
+    public List<MoviePosterDto> getMovies(int pageNumber, int pageSize) {
+        PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Movie> moviesPage = movieRepository.findAllSortedByPriorityAndUpdateDate(pageable);
+
+        List<MoviePosterDto> moviePosterDtos = moviesPage.getContent().stream()
+                // getTmdbId(movie)가 null이 아닌 경우에만 처리
+                .filter(movie -> getTmdbId(movie) != null)
+                .map(movie -> tmdbClient.searchMoviePoster(getTmdbId(movie)))
+                .collect(Collectors.toList());
+
+        // PageImpl을 사용하여 Page<MoviePosterDto> 객체 생성
+        return moviePosterDtos;
+    }
+
+    public Long getTmdbId (Movie movie)
+    {
+        Optional<Links> link=linksRepository.findByMovieId(movie);
+        if(link.isPresent())
+        {
+            return link.get().getTmdbId();
+        }
+        return null;
     }
 }
 

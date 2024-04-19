@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import com.example.demo.domain.entity.Movie;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,6 +25,15 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findByMovieIdIn(List<Long> movieIds);
 
     List<Movie> findByTitleIn(List<String> recommendations);
+
+
+    Page<Movie> findAll(Pageable pageable);
+
+    @Query("SELECT m FROM Movie m ORDER BY m.priority DESC NULLS LAST, m.updateDate DESC NULLS LAST")
+    List<Movie> findAllSortedByPriorityAndUpdateDate();
+
+    @Query("SELECT m FROM Movie m ORDER BY m.priority DESC NULLS LAST, m.updateDate DESC NULLS LAST")
+    Page<Movie> findAllSortedByPriorityAndUpdateDate(Pageable pageable);
 
     @Query(value = "SELECT m FROM Movie m ORDER BY RAND() LIMIT 4")
     List<Movie> findRandomMovie();

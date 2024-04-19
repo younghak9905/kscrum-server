@@ -2,8 +2,12 @@ package com.example.demo.service;
 import com.example.demo.domain.dto.MovieDto;
 import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.dto.MovieResponseDto;
+import com.example.demo.domain.entity.Movie;
+import com.example.demo.repository.LinksRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -13,6 +17,7 @@ public class TmdbClient {
     private final RestTemplate restTemplate;
     private final String apiKey;
     private final String baseUrl;
+
 
     public TmdbClient(RestTemplate restTemplate,
                       @Value("${tmdb.api.key}") String apiKey,
@@ -39,12 +44,36 @@ public class TmdbClient {
     }
 
 
-    public MovieResponseDto searchMoviePoster(String query) {
+    public MoviePosterDto searchMoviePoster(String query) {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/search/movie")
                 .queryParam("api_key", apiKey)
                 .queryParam("query", query)
                 .queryParam("language", "ko-KR")
                 .toUriString();
-        return restTemplate.getForObject(url, MovieResponseDto .class);
+        MovieResponseDto movie =restTemplate.getForObject(url, MovieResponseDto .class);
+        MoviePosterDto movies = MoviePosterDto.builder()
+                .movieId(movie.getResults().get(0).getId())
+                .title(movie.getResults().get(0).getOriginalTitle())
+                .posterPath(movie.getResults().get(0).getPosterPath())
+                .url("https://image.tmdb.org/t/p/w500/"+movie.getResults().get(0).getPosterPath())
+                .build();
+        return movies;
     }
+
+
+    public MoviePosterDto searchMoviePoster(Long movieId) {
+
+        MovieDto movie =getMovieDetails(movieId);
+        MoviePosterDto movies = MoviePosterDto.builder()
+                .movieId(movie.getId())
+                .title(movie.getOriginalTitle())
+                .posterPath(movie.getPosterPath())
+                .url("https://image.tmdb.org/t/p/w500/"+movie.getPosterPath())
+                .build();
+        return movies;
+    }
+
+
+
+
 }

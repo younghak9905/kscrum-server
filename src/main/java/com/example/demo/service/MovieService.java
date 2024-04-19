@@ -1,32 +1,36 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.dto.MovieChoiceRequestDto;
+import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.entity.Genre;
+import com.example.demo.domain.entity.Links;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.domain.entity.MovieGenre;
 import com.example.demo.repository.GenreRepository;
+import com.example.demo.repository.LinksRepository;
 import com.example.demo.repository.MovieGenreRepository;
 import com.example.demo.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +41,9 @@ public class MovieService {
 
     private final MovieGenreRepository movieGenreRepository;
 
+    private final LinksRepository linksRepository;
+
+    private final TmdbClient tmdbClient;
 
     private final WebClient webClient;
 
@@ -180,6 +187,37 @@ public class MovieService {
         movieRepository.saveAll(movies);
 
     }
+
+
+    public Page<Movie> getMovies(Pageable pageable) {
+        return movieRepository.findAll(pageable);
+    }
+
+    public List<MoviePosterDto> getMovies(int pageNumber, int pageSize) {
+        PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Movie> moviesPage = movieRepository.findAllSortedByPriorityAndUpdateDate(pageable);
+
+        List<MoviePosterDto> moviePosterDtos = moviesPage.getContent().stream()
+                // getTmdbId(movie)가 null이 아닌 경우에만 처리
+                .filter(movie -> getTmdbId(movie) != null)
+                .map(movie -> tmdbClient.searchMoviePoster(getTmdbId(movie)))
+                .collect(Collectors.toList());
+
+        // PageImpl을 사용하여 Page<MoviePosterDto> 객체 생성
+        return moviePosterDtos;
+    }
+
+    public Long getTmdbId (Movie movie)
+    {
+        Optional<Links> link=linksRepository.findByMovieId(movie);
+        if(link.isPresent())
+        {
+            return link.get().getTmdbId();
+        }
+        return null;
+    }
+
+
 }
 
 

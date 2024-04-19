@@ -22,4 +22,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findMoviesWithLimitOffset(@Param("batchSize") int batchSize, @Param("offset") int offset);
 
     List<Movie> findByMovieIdIn(List<Long> movieIds);
+
+    List<Movie> findByTitleIn(List<String> recommendations);
 }

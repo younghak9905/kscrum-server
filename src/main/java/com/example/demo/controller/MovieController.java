@@ -1,15 +1,14 @@
 package com.example.demo.controller;
 
-import com.example.demo.domain.dto.MovieChoiceRequestDto;
-import com.example.demo.domain.dto.MovieDto;
-import com.example.demo.domain.dto.MoviePosterDto;
-import com.example.demo.domain.dto.MovieResponseDto;
+import com.example.demo.domain.dto.*;
 import com.example.demo.repository.MovieRepository;
 import com.example.demo.service.MovieService;
 import com.example.demo.service.TmdbClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/movie")
@@ -36,15 +35,8 @@ public class MovieController {
 
     @GetMapping("/poster")
     public ResponseEntity<MoviePosterDto> getMoviePoster(@RequestParam String query) {
-        MovieResponseDto movies = tmdbClient. searchMoviePoster(query);
-        MoviePosterDto posterDto = MoviePosterDto.builder()
-                .movieId(movies.getResults().get(0).getId())
-                .title(movies.getResults().get(0).getOriginalTitle())
-                .posterPath(movies.getResults().get(0).getPosterPath())
-                .url("https://image.tmdb.org/t/p/w500/"+movies.getResults().get(0).getPosterPath())
-                .build();
-
-        return ResponseEntity.ok(posterDto);
+        MoviePosterDto movies = tmdbClient. searchMoviePoster(query);
+        return ResponseEntity.ok(movies);
     }
 
     @DeleteMapping()
@@ -69,5 +61,10 @@ public class MovieController {
     public ResponseEntity<Void> choiceMovie(@RequestBody MovieChoiceRequestDto dto) {
         movieService.choiceMovie(dto);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/choice")
+    public ResponseEntity<List<MoviePosterDto>> choiceMovie() {
+        return ResponseEntity.ok(movieService.choiceRandomMovies());
     }
 }

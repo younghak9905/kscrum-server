@@ -39,12 +39,19 @@ public class TmdbClient {
     }
 
 
-    public MovieResponseDto searchMoviePoster(String query) {
+    public MoviePosterDto searchMoviePoster(String query) {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/search/movie")
                 .queryParam("api_key", apiKey)
                 .queryParam("query", query)
                 .queryParam("language", "ko-KR")
                 .toUriString();
-        return restTemplate.getForObject(url, MovieResponseDto .class);
+        MovieResponseDto movie = restTemplate.getForObject(url, MovieResponseDto.class);
+        MoviePosterDto movies = MoviePosterDto.builder()
+                .movieId(movie.getResults().get(0).getId())
+                .title(movie.getResults().get(0).getOriginalTitle())
+                .posterPath(movie.getResults().get(0).getPosterPath())
+                .url("https://image.tmdb.org/t/p/w500/"+movie.getResults().get(0).getPosterPath())
+                .build();
+        return movies;
     }
 }

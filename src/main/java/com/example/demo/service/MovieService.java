@@ -1,10 +1,14 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.dto.MovieChoiceRequestDto;
+import com.example.demo.domain.dto.MoviePosterDto;
+import com.example.demo.domain.dto.MovieResponseDto;
 import com.example.demo.domain.entity.Genre;
+import com.example.demo.domain.entity.Links;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.domain.entity.MovieGenre;
 import com.example.demo.repository.GenreRepository;
+import com.example.demo.repository.LinksRepository;
 import com.example.demo.repository.MovieGenreRepository;
 import com.example.demo.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +24,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,8 +38,11 @@ public class MovieService {
 
     private final MovieGenreRepository movieGenreRepository;
 
+    private final LinksRepository linksRepository;
 
     private final WebClient webClient;
+
+    private final TmdbClient tmdbClient;
 
 
     public Movie getMovieByMovieId(Long movieId) {
@@ -179,6 +183,19 @@ public class MovieService {
         });
         movieRepository.saveAll(movies);
 
+    }
+
+    public List<MoviePosterDto> choiceRandomMovies() {
+        List<Movie> randomMovies = movieRepository.findRandomMovie();
+
+        List<MoviePosterDto> moviePosterDtos = new ArrayList<>();
+        for(Movie movie : randomMovies) {
+            Long tmdbId = linksRepository.findTmdbIdByMovieId(movie).get(0).getTmdbId();
+            System.out.println("tmdbId = " + tmdbId);
+            MoviePosterDto moviePosterDto = tmdbClient.searchMoviePoster(Long.toString(tmdbId));
+            moviePosterDtos.add(moviePosterDto);
+        }
+        return moviePosterDtos;
     }
 }
 

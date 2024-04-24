@@ -8,8 +8,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.webjars.NotFoundException;
 
 @Service
 public class TmdbClient {
@@ -37,10 +40,22 @@ public class TmdbClient {
     }
 
     public MovieDto getMovieDetails(Long movieId) {
-        String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/movie/" + movieId)
-                .queryParam("api_key", apiKey)
-                .toUriString();
-        return restTemplate.getForObject(url, MovieDto.class);
+//        String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/movie/" + movieId)
+//                .queryParam("api_key", apiKey)
+//                .toUriString();
+//        return restTemplate.getForObject(url, MovieDto.class);
+        try {
+            String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/movie/" + movieId)
+                    .queryParam("api_key", apiKey)
+                    .toUriString();
+            return restTemplate.getForObject(url, MovieDto.class);
+        } catch (HttpClientErrorException.NotFound ex) {
+            // 영화 ID에 해당하는 영화가 존재하지 않는 경우
+            // 혹은 TMDB API에서 해당 리소스를 찾을 수 없는 경우
+            // 예외를 처리하고 적절한 에러 메시지를 반환
+            //throw new NotFoundException("Requested movie does not exist.");
+            return null;
+        }
     }
 
 
@@ -63,7 +78,9 @@ public class TmdbClient {
 
     public MoviePosterDto searchMoviePoster(Long movieId) {
 
-        MovieDto movie =getMovieDetails(movieId);
+        MovieDto movie = getMovieDetails(movieId);
+        if (movie == null)
+            return null;
         MoviePosterDto movies = MoviePosterDto.builder()
                 .movieId(movie.getId())
                 .title(movie.getOriginalTitle())

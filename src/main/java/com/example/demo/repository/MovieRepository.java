@@ -31,13 +31,14 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     Page<Movie> findAll(Pageable pageable);
 
+
     @Query("SELECT m FROM Movie m ORDER BY m.priority DESC NULLS LAST, m.updateDate DESC NULLS LAST")
     List<Movie> findAllSortedByPriorityAndUpdateDate();
 
     @Query("SELECT m FROM Movie m ORDER BY m.priority DESC NULLS LAST, m.updateDate DESC NULLS LAST")
     Page<Movie> findAllSortedByPriorityAndUpdateDate(Pageable pageable);
 
-    @Query(value = "SELECT m FROM Movie m ORDER BY RAND() LIMIT 4")
+    @Query(value = "SELECT m FROM Movie m ORDER BY RAND() LIMIT 4", nativeQuery = true)
     List<Movie> findRandomMovie();
 
     @Query(value = "SELECT * FROM (SELECT * FROM movies WHERE genres = :genre ORDER BY RAND() LIMIT 4) AS subquery", nativeQuery = true)

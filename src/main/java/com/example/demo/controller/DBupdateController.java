@@ -15,7 +15,6 @@ public class DBupdateController {
 
     private final DBupdateService dbupdateService;
 
-    private final MovieService movieService;
 
     @PostMapping("/insert/testuser")
     public void insertTestUser() {

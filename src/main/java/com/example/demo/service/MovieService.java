@@ -203,19 +203,33 @@ public class MovieService {
         return movieRepository.findAll(pageable);
     }
 
+    //추천 알고리즘에 의한 영화 추천 리스트 반환
     public List<MoviePosterDto> getMovies(int pageNumber, int pageSize) {
         PageRequest pageable = PageRequest.of(pageNumber, pageSize);
         Page<Movie> moviesPage = movieRepository.findAllSortedByPriorityAndUpdateDate(pageable);
+        List<MoviePosterDto> moviePosterDtos = movieToMoviePosterDto(moviesPage.getContent());
+        // PageImpl을 사용하여 Page<MoviePosterDto> 객체 생성
+        return moviePosterDtos;
+    }
 
-        List<MoviePosterDto> moviePosterDtos = moviesPage.getContent().stream()
+    public List<MoviePosterDto> getAllMovies(int pageNumber, int pageSize) {
+        PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+        List<MoviePosterDto> moviePosterDtos = movieToMoviePosterDto(getMovies(pageable).getContent());
+        return moviePosterDtos;
+    }
+
+    public List<MoviePosterDto> movieToMoviePosterDto(List<Movie> movieList) {
+
+        List<MoviePosterDto> moviePosterDtos = movieList.stream()
                 // getTmdbId(movie)가 null이 아닌 경우에만 처리
                 .filter(movie -> getTmdbId(movie) != null)
                 .map(movie -> tmdbClient.searchMoviePoster(getTmdbId(movie)))
                 .collect(Collectors.toList());
-
-        // PageImpl을 사용하여 Page<MoviePosterDto> 객체 생성
         return moviePosterDtos;
+
     }
+
+
 
     public Long getTmdbId (Movie movie)
     {

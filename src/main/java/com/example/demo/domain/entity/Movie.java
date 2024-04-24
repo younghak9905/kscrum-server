@@ -13,7 +13,8 @@ import java.util.List;
 @Table(name = "movies",indexes = {
         @Index(name = "idx_movies_title", columnList = "title"),
         @Index(name = "idx_movies_priority", columnList = "priority"),
-        @Index(name="idx_movies_update_date", columnList = "updateDate")
+        @Index(name="idx_movies_update_date", columnList = "updateDate"),
+        @Index(name="idx_movies_priority_update_date", columnList = "priority, updateDate")
 })
 public class Movie {
     //현재 테이블

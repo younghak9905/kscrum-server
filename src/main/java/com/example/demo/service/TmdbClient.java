@@ -2,8 +2,11 @@ package com.example.demo.service;
 import com.example.demo.domain.dto.MovieDto;
 import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.dto.MovieResponseDto;
+import com.example.demo.domain.entity.Links;
 import com.example.demo.domain.entity.Movie;
+import com.example.demo.domain.entity.PosterUrl;
 import com.example.demo.repository.LinksRepository;
+import com.example.demo.repository.PosterUrlRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,13 +24,18 @@ public class TmdbClient {
     private final String apiKey;
     private final String baseUrl;
 
+    private final PosterUrlRepository posterUrlRepository;
+
 
     public TmdbClient(RestTemplate restTemplate,
                       @Value("${tmdb.api.key}") String apiKey,
-                      @Value("${tmdb.api.baseurl}") String baseUrl) {
+                      @Value("${tmdb.api.baseurl}") String baseUrl,
+                      PosterUrlRepository posterUrlRepository) {
         this.restTemplate = restTemplate;
         this.apiKey = apiKey;
         this.baseUrl = baseUrl;
+        this.posterUrlRepository = posterUrlRepository;
+
     }
 
     public MovieResponseDto searchMovies(String query) {
@@ -76,20 +84,13 @@ public class TmdbClient {
     }
 
 
-    public MoviePosterDto searchMoviePoster(Long movieId) {
-
-        MovieDto movie = getMovieDetails(movieId);
+    public String getPosterUrl(Long tmdbId)
+    {
+        MovieDto movie = getMovieDetails(tmdbId);
         if (movie == null)
             return null;
-        MoviePosterDto movies = MoviePosterDto.builder()
-                .movieId(movie.getId())
-                .title(movie.getOriginalTitle())
-                .posterPath(movie.getPosterPath())
-                .url("https://image.tmdb.org/t/p/w500/"+movie.getPosterPath())
-                .build();
-        return movies;
+        return "https://image.tmdb.org/t/p/w500/"+movie.getPosterPath();
     }
-
 
 
 

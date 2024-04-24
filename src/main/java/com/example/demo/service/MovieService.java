@@ -2,14 +2,8 @@ package com.example.demo.service;
 
 import com.example.demo.domain.dto.MovieChoiceRequestDto;
 import com.example.demo.domain.dto.MoviePosterDto;
-import com.example.demo.domain.entity.Genre;
-import com.example.demo.domain.entity.Links;
-import com.example.demo.domain.entity.Movie;
-import com.example.demo.domain.entity.MovieGenre;
-import com.example.demo.repository.GenreRepository;
-import com.example.demo.repository.LinksRepository;
-import com.example.demo.repository.MovieGenreRepository;
-import com.example.demo.repository.MovieRepository;
+import com.example.demo.domain.entity.*;
+import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
@@ -37,9 +31,14 @@ public class MovieService {
 
     private final LinksRepository linksRepository;
 
+
+    private final MovieGenreRepository movieGenreRepository;
+
     private final WebClient webClient;
 
     private final TmdbClient tmdbClient;
+
+    private final PosterUrlRepository posterUrlRepository;
 
 
     public Movie getMovieByMovieId(Long movieId) {
@@ -104,59 +103,10 @@ public class MovieService {
 
         for(Genre genre : movieGenres){
             List<Movie> randomMovies = movieRepository.findRandomMoviesByGenre(genre.getGenreName());
-            for(Movie movie : randomMovies) {
-                Long tmdbId = getTmdbId(movie);
-//                System.out.print("tmdbId = " + tmdbId+", ");
-//                System.out.println("genre.getGenreName() = " + genre.getGenreName());
-                MoviePosterDto moviePosterDto = tmdbClient.searchMoviePoster(tmdbId);
-                moviePosterDtos.add(moviePosterDto);
-            }
+            moviePosterDtos.addAll(movieToMoviePosterDto(randomMovies));
         }
 
         return moviePosterDtos;
-    }
-
-
-    public Page<Movie> getMovies(Pageable pageable) {
-        return movieRepository.findAll(pageable);
-    }
-
-    //추천 알고리즘에 의한 영화 추천 리스트 반환
-    public List<MoviePosterDto> getMovies(int pageNumber, int pageSize) {
-        PageRequest pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Movie> moviesPage = movieRepository.findAllSortedByPriorityAndUpdateDate(pageable);
-        List<MoviePosterDto> moviePosterDtos = movieToMoviePosterDto(moviesPage.getContent());
-        // PageImpl을 사용하여 Page<MoviePosterDto> 객체 생성
-        return moviePosterDtos;
-    }
-
-    public List<MoviePosterDto> getAllMovies(int pageNumber, int pageSize) {
-        PageRequest pageable = PageRequest.of(pageNumber, pageSize);
-        List<MoviePosterDto> moviePosterDtos = movieToMoviePosterDto(getMovies(pageable).getContent());
-        return moviePosterDtos;
-    }
-
-    public List<MoviePosterDto> movieToMoviePosterDto(List<Movie> movieList) {
-
-        List<MoviePosterDto> moviePosterDtos = movieList.stream()
-                // getTmdbId(movie)가 null이 아닌 경우에만 처리
-                .filter(movie -> getTmdbId(movie) != null)
-                .map(movie -> tmdbClient.searchMoviePoster(getTmdbId(movie)))
-                .collect(Collectors.toList());
-        return moviePosterDtos;
-
-    }
-
-
-
-    public Long getTmdbId (Movie movie)
-    {
-        Optional<Links> link=linksRepository.findByMovieId(movie);
-        if(link.isPresent())
-        {
-            return link.get().getTmdbId();
-        }
-        return null;
     }
 
     public List<Genre> findAllGenres() {
@@ -168,6 +118,80 @@ public class MovieService {
                 .collect(Collectors.toList());
     }
 
+
+    public Page<Movie> getMovies(Pageable pageable) {
+        return movieRepository.findAll(pageable);
+    }
+
+    //추천 알고리즘에 의한 영화 추천 리스트 반환
+    public List<MoviePosterDto> getMovies(int pageNumber, int pageSize) {
+        long startTime = System.currentTimeMillis();
+
+        PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Movie> moviesPage = movieRepository.findAllSortedByPriorityAndUpdateDate(pageable);
+        System.out.println("Page retrieval time: " + (System.currentTimeMillis() - startTime) + " ms");
+
+        startTime = System.currentTimeMillis();
+        List<MoviePosterDto> moviePosterDtos = movieToMoviePosterDto(moviesPage.getContent());
+        System.out.println("Poster DTO conversion time: " + (System.currentTimeMillis() - startTime) + " ms");
+
+        return moviePosterDtos;
+    }
+
+
+    public List<MoviePosterDto> getAllMovies(int pageNumber, int pageSize) {
+        PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+        List<MoviePosterDto> moviePosterDtos = movieToMoviePosterDto(getMovies(pageable).getContent());
+        return moviePosterDtos;
+    }
+
+
+
+
+    public List<MoviePosterDto> movieToMoviePosterDto(List<Movie> movieList) {
+        long startTime = System.currentTimeMillis();
+        List<MoviePosterDto> result = movieList.stream()
+                .map(this::createMoviePosterDto)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toList());
+        System.out.println("Movie to Poster DTO processing time: " + (System.currentTimeMillis() - startTime) + " ms");
+        return result;
+    }
+
+    private MoviePosterDto createMoviePosterDto(Movie movie) {
+        long startTime = System.currentTimeMillis();
+        Optional<String> posterUrlOptional = posterUrlRepository.findPosterUrlByMovieId(movie.getMovieId());
+        String posterUrl = posterUrlOptional.orElseGet(() -> fetchAndSavePosterUrl(movie));
+
+        System.out.println("Create MoviePosterDto time: " + (System.currentTimeMillis() - startTime) + " ms");
+        return new MoviePosterDto(movie, posterUrl);
+    }
+
+    private String fetchAndSavePosterUrl(Movie movie) {
+        Long tmdbId= getTmdbId(movie);
+        String posterUrl = tmdbClient.getPosterUrl(tmdbId);
+        System.out.println("Fetched poster URL: " + posterUrl);
+        savePosterUrl(movie, posterUrl); // Save to repository
+        return posterUrl;
+    }
+
+    private void savePosterUrl(Movie movie, String posterUrl) {
+        PosterUrl newPoster = new PosterUrl();
+        newPoster.setMovieId(movie.getMovieId());
+        newPoster.setPosterUrl(posterUrl);
+        posterUrlRepository.save(newPoster); // Assuming this method exists
+    }
+
+
+    public Long getTmdbId(Movie movie)
+    {long startTime = System.currentTimeMillis();
+        Optional<Links> link=linksRepository.findByMovieId(movie);
+        if(link.isPresent())
+        {    System.out.println("findTmdbId: " + (System.currentTimeMillis() - startTime) + " ms");
+            return link.get().getTmdbId();
+        }
+        return null;
+    }
 }
 
 

@@ -1,5 +1,6 @@
 package com.example.demo.domain.dto;
 
+import com.example.demo.domain.entity.Movie;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,5 +23,13 @@ public class MoviePosterDto {
         this.title = title;
         this.posterPath = posterPath;
         this.url = url;
+    }
+
+    public MoviePosterDto(Movie movie, String posterPath) {
+        this.movieId = movie.getMovieId();
+        this.title = movie.getTitle();
+        this.posterPath = posterPath;
+        this.url = "https://image.tmdb.org/t/p/w500"+url;
+
     }
 }

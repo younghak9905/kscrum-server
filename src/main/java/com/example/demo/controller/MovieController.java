@@ -21,13 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MovieController {
 
-    private final TmdbClient tmdbClient;
-
-    private final MovieRepository movieRepository;
-
     private final MovieService movieService;
 
-    private final DBupdateService dBupdateService;
 
 
     //영화 이름으로 tmdb api로부터 영화 정보를 검색
@@ -52,14 +47,16 @@ public class MovieController {
 
     @GetMapping("/posters")
     public ResponseEntity<List<MoviePosterDto>> listMovies(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                           @RequestParam(value = "size", defaultValue = "10") int size) {
+                                                           @RequestParam(value = "size", defaultValue = "8") int size) {
         return ResponseEntity.ok(movieService.getMovies(page, size));
     }
 //필터링을 적용하지 않은 영화 리스트를 페이징을 자굥ㅇ하여
     @GetMapping("")
     public ResponseEntity<List<MoviePosterDto>> listAllMovies(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                           @RequestParam(value = "size", defaultValue = "10") int size) {
+                                                           @RequestParam(value = "size", defaultValue = "8") int size) {
         return ResponseEntity.ok(movieService.getAllMovies(page, size));
     }
+
+
 }
 

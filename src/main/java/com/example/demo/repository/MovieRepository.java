@@ -1,6 +1,8 @@
 package com.example.demo.repository;
 
+import com.example.demo.domain.entity.Genre;
 import com.example.demo.domain.entity.Movie;
+import com.example.demo.domain.entity.MovieGenre;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,4 +39,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     @Query(value = "SELECT m FROM Movie m ORDER BY RAND() LIMIT 4")
     List<Movie> findRandomMovie();
+
+    @Query(value = "SELECT * FROM (SELECT * FROM movies WHERE genres = :genre ORDER BY RAND() LIMIT 4) AS subquery", nativeQuery = true)
+    List<Movie> findRandomMoviesByGenre(@Param("genre") String genre);
 }

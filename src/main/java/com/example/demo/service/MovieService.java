@@ -186,15 +186,22 @@ public class MovieService {
     }
 
     public List<MoviePosterDto> choiceRandomMovies() {
-        List<Movie> randomMovies = movieRepository.findRandomMovie();
+        //List<Movie> randomMovies = movieRepository.findRandomMovie();
 
         List<MoviePosterDto> moviePosterDtos = new ArrayList<>();
-        for(Movie movie : randomMovies) {
-            Long tmdbId =getTmdbId(movie);
-            System.out.println("tmdbId = " + tmdbId);
-            MoviePosterDto moviePosterDto = tmdbClient.searchMoviePoster(tmdbId);
-            moviePosterDtos.add(moviePosterDto);
+        List<Genre> movieGenres = findAllGenres();
+
+        for(Genre genre : movieGenres){
+            List<Movie> randomMovies = movieRepository.findRandomMoviesByGenre(genre.getGenreName());
+            for(Movie movie : randomMovies) {
+                Long tmdbId = getTmdbId(movie);
+//                System.out.print("tmdbId = " + tmdbId+", ");
+//                System.out.println("genre.getGenreName() = " + genre.getGenreName());
+                MoviePosterDto moviePosterDto = tmdbClient.searchMoviePoster(tmdbId);
+                moviePosterDtos.add(moviePosterDto);
+            }
         }
+
         return moviePosterDtos;
     }
 
@@ -240,6 +247,16 @@ public class MovieService {
         }
         return null;
     }
+
+    public List<Genre> findAllGenres() {
+        List<MovieGenre> movieGenres = movieGenreRepository.findAll();
+        return movieGenres.stream()
+                .map(MovieGenre::getGenre)
+                .distinct()
+                .limit(4)
+                .collect(Collectors.toList());
+    }
+
 }
 
 

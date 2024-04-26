@@ -7,10 +7,10 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "ratings")/*,indexes = {
+@Table(name = "ratings",indexes = {
         @Index(name = "idx_movie_id", columnList = "movie_id"), // 'movie_id' 컬럼에 대한 인덱스
         @Index(name = "idx_user_id", columnList = "user_id") // 'user_id' 컬럼에 대한 인덱스
-})*/
+})
 public class Ratings {
 
     @Id

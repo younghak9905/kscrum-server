@@ -7,9 +7,9 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "movie_genre")/*, indexes = {
+@Table(name = "movie_genre", indexes = {
         @Index(name = "idx_movie_genre_movie_id", columnList = "movie_id"),
-        @Index(name = "idx_movie_genre_genre_id", columnList = "genre_id")})*/
+        @Index(name = "idx_movie_genre_genre_id", columnList = "genre_id")})
 public class MovieGenre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

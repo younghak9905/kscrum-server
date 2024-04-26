@@ -57,6 +57,12 @@ public class MovieController {
         return ResponseEntity.ok(movieService.getAllMovies(page, size));
     }
 
+    @GetMapping("/posters/test")
+    public ResponseEntity<List<Movie>> listMoviesTest(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                           @RequestParam(value = "size", defaultValue = "8") int size) {
+        return ResponseEntity.ok(movieService.getMoviesTest(page, size));
+    }
+
 
 }
 

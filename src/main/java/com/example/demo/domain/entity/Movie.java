@@ -33,6 +33,8 @@ public class Movie {
 
     private LocalDateTime updateDate;
 
+    private String posterUrl;
+
 
 }
 

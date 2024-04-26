@@ -5,6 +5,7 @@ import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.entity.*;
 import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -46,8 +47,6 @@ public class MovieService {
     }
 
 
-
-
     public void choiceMovie(MovieChoiceRequestDto dto) {
         List<Long> movieIds = dto.getMovieIds();
         List<Movie> movies = movieRepository.findByMovieIdIn(movieIds);
@@ -78,7 +77,8 @@ public class MovieService {
                         status -> status.is4xxClientError() || status.is5xxServerError(),
                         response -> Mono.error(new RuntimeException("API call failed with status: " + response.statusCode()))
                 )
-                .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                .bodyToMono(new ParameterizedTypeReference<List<String>>() {
+                })
                 .doOnError(error -> System.out.println("API call error: " + error.getMessage()))
                 .toFuture();
     }
@@ -101,7 +101,7 @@ public class MovieService {
         List<MoviePosterDto> moviePosterDtos = new ArrayList<>();
         List<Genre> movieGenres = findAllGenres();
 
-        for(Genre genre : movieGenres){
+        for (Genre genre : movieGenres) {
             List<Movie> randomMovies = movieRepository.findRandomMoviesByGenre(genre.getGenreName());
             moviePosterDtos.addAll(movieToMoviePosterDto(randomMovies));
         }
@@ -146,8 +146,6 @@ public class MovieService {
     }
 
 
-
-
     public List<MoviePosterDto> movieToMoviePosterDto(List<Movie> movieList) {
         long startTime = System.currentTimeMillis();
         List<MoviePosterDto> result = movieList.stream()
@@ -160,17 +158,18 @@ public class MovieService {
 
     private MoviePosterDto createMoviePosterDto(Movie movie) {
         long startTime = System.currentTimeMillis();
-        Optional<String> posterUrlOptional = posterUrlRepository.findPosterUrlByMovieId(movie.getMovieId());
-        String posterUrl = posterUrlOptional.orElseGet(() -> fetchAndSavePosterUrl(movie));
+        String posterUrl = getPosterUrl(movie);
         System.out.println("Create MoviePosterDto time: " + (System.currentTimeMillis() - startTime) + " ms");
         return new MoviePosterDto(movie, posterUrl);
     }
 
     private String fetchAndSavePosterUrl(Movie movie) {
-        Long tmdbId= getTmdbId(movie);
+        Long tmdbId = getTmdbId(movie);
         String posterUrl = tmdbClient.getPosterUrl(tmdbId);
         System.out.println("Fetched poster URL: " + posterUrl);
-        savePosterUrl(movie, posterUrl); // Save to repository
+        movie.setPosterUrl(posterUrl); // Save to entity (not saved to DB yet
+        movieRepository.save(movie); // Save to DB
+       //  savePosterUrl(movie, posterUrl); // Save to repository
         return posterUrl;
     }
 
@@ -181,16 +180,36 @@ public class MovieService {
         posterUrlRepository.save(newPoster); // Assuming this method exists
     }
 
-
-    public Long getTmdbId(Movie movie)
-    {long startTime = System.currentTimeMillis();
-        Optional<Links> link=linksRepository.findByMovieId(movie);
-        if(link.isPresent())
-        {    System.out.println("findTmdbId: " + (System.currentTimeMillis() - startTime) + " ms");
+    //  @Cacheable(value = "movieCache", key = "#movie.movieId")
+    public Long getTmdbId(Movie movie) {
+        long startTime = System.currentTimeMillis();
+        Optional<Links> link = linksRepository.findByMovieId(movie);
+        if (link.isPresent()) {
+            System.out.println("findTmdbId: " + (System.currentTimeMillis() - startTime) + " ms");
             return link.get().getTmdbId();
         }
         return null;
     }
-}
 
+    //  @Cacheable(value = "posterUrls", key = "#movie.movieId")
+    public String getPosterUrl(Movie movie) {
+        if(movie.getPosterUrl() != null) {
+            return movie.getPosterUrl();
+        }
+        return fetchAndSavePosterUrl(movie);
+    }
+
+
+    public List<Movie> getMoviesTest(int pageNumber, int pageSize) {
+        long startTime = System.currentTimeMillis();
+
+        PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Movie> moviesPage = movieRepository.findAllSortedByPriorityAndUpdateDate(pageable);
+        System.out.println("Poster DTO conversion time: " + (System.currentTimeMillis() - startTime) + " ms");
+
+        return moviesPage.getContent();
+
+
+    }
+}
 

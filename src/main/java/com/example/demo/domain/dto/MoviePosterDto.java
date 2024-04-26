@@ -29,7 +29,15 @@ public class MoviePosterDto {
         this.movieId = movie.getMovieId();
         this.title = movie.getTitle();
         this.posterPath = posterPath;
-        this.url = "https://image.tmdb.org/t/p/w500"+url;
+        this.url = "https://image.tmdb.org/t/p/w500"+posterPath;
+
+    }
+
+    public MoviePosterDto(Movie movie) {
+        this.movieId = movie.getMovieId();
+        this.title = movie.getTitle();
+        this.posterPath = movie.getPosterUrl();
+        this.url = "https://image.tmdb.org/t/p/w500"+movie.getPosterUrl();
 
     }
 }

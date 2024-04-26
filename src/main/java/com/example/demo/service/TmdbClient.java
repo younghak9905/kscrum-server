@@ -89,7 +89,7 @@ public class TmdbClient {
         MovieDto movie = getMovieDetails(tmdbId);
         if (movie == null)
             return null;
-        return "https://image.tmdb.org/t/p/w500/"+movie.getPosterPath();
+        return movie.getPosterPath();
     }
 
 

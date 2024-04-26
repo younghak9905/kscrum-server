@@ -7,10 +7,10 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "tags")/*,indexes = {
+@Table(name = "tags",indexes = {
         @Index(name = "idx_movie_id", columnList = "movie_id"), // 'movie_id' 컬럼에 대한 인덱스
         @Index(name = "idx_user_id", columnList = "user_id") // 'user_id' 컬럼에 대한 인덱스
-})*/
+})
 public class Tags {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

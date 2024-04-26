@@ -2,7 +2,7 @@ server:
     port: 8080
     tomcat:
         access-log:
-            enabled: true
+            enabled: false
             directory: logs
             prefix: access_log
             suffix: .access.log

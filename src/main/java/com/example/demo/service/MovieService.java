@@ -162,7 +162,6 @@ public class MovieService {
         long startTime = System.currentTimeMillis();
         Optional<String> posterUrlOptional = posterUrlRepository.findPosterUrlByMovieId(movie.getMovieId());
         String posterUrl = posterUrlOptional.orElseGet(() -> fetchAndSavePosterUrl(movie));
-
         System.out.println("Create MoviePosterDto time: " + (System.currentTimeMillis() - startTime) + " ms");
         return new MoviePosterDto(movie, posterUrl);
     }

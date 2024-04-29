@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,10 @@ public class DBupdateService {
 
     private final MovieGenreRepository movieGenreRepository;
 
+    private final TmdbClient tmdbClient;
+
+
+    private final MovieService movieService;
     public void insertTestUser() {
         //1~610까지의 데이터를 넣어줍니다.
         for (int i = 1; i <= 610; i++) {
@@ -82,7 +87,7 @@ public class DBupdateService {
         long totalMovies = movieRepository.count();
         int totalPages = (int) Math.ceil((double) totalMovies / pageSize);
 
-        for (int page = 50; page < totalPages; page++) {
+        for (int page = 0; page < totalPages; page++) {
             Pageable pageable = PageRequest.of(page, pageSize);
             Page<Movie> moviePage = movieRepository.findAll(pageable);
 
@@ -132,6 +137,41 @@ public class DBupdateService {
         });
 
         movieGenreRepository.saveAll(movieGenres);
+    }
+
+
+    @Async
+    public CompletableFuture<Void> updateMoviePostersAsync(int page, int size) {
+        // 계산된 시작 인덱스: 페이지 번호가 2이면 200부터 시작 (2 * 100)
+        int startIndex = page * 100;
+
+        for (int i = 0; i < size; i++) {
+            // 페이지 요청 생성: 각 반복에서 페이지 크기는 100으로 고정
+            Pageable pageable = PageRequest.of((startIndex / 100) + i, 100);
+            Page<Movie> moviePage = movieRepository.findAll(pageable);
+
+            // 페이지별로 영화 포스터 URL 업데이트
+            List<Movie> updatedMovies = moviePage.getContent().stream()
+                    .map(this::updateMoviePoster)
+                    .collect(Collectors.toList());
+
+            // 데이터베이스에 한번에 저장
+            movieRepository.saveAll(updatedMovies);
+
+            // 진행 상황 로깅
+            System.out.println("Processed page: " + ((startIndex / 100) + i + 1) + ", movies processed: " + updatedMovies.size());
+        }
+
+        return CompletableFuture.completedFuture(null);
+    }
+
+    private Movie updateMoviePoster(Movie movie) {
+        Long tmdbId = movieService.getTmdbId(movie);
+        if (tmdbId != null) {
+            String posterUrl = tmdbClient.getPosterUrl(tmdbId);
+            movie.setPosterUrl(posterUrl);
+        }
+        return movie;
     }
 
 

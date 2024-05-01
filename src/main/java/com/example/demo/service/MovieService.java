@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.dto.MovieChoiceRequestDto;
+import com.example.demo.domain.dto.MovieGenreDto;
 import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.entity.*;
 import com.example.demo.repository.*;
@@ -116,6 +117,25 @@ public class MovieService {
         return moviePosterDtos;
     }
 
+    public MovieGenreDto choiceRandomMovies(String genre) {
+        //List<Movie> randomMovies = movieRepository.findRandomMovie();
+
+        List<MoviePosterDto> moviePosterDtos = new ArrayList<>();
+//        List<Genre> movieGenres = findAllGenres();
+
+            System.out.println("Genre: " + genre);
+            if(genre.equals("Romance")){ // 로맨스는 영화가 별로 없어서 년도 기준 뺐습니다.
+                List<Movie> randomMovies = movieRepository.findRandomMoviesByRomance(genre);
+                moviePosterDtos.addAll(movieToMoviePosterDto(randomMovies));
+            } else {
+                List<Movie> randomMovies = movieRepository.findRandomMoviesByGenre(genre);
+                moviePosterDtos.addAll(movieToMoviePosterDto(randomMovies));
+            }
+        MovieGenreDto movieGenreDto = new MovieGenreDto(genre, moviePosterDtos);
+
+        return movieGenreDto;
+    }
+
     public List<Genre> findAllGenres() {
         List<MovieGenre> movieGenres = movieGenreRepository.findAll();
         return movieGenres.stream()
@@ -144,6 +164,22 @@ public class MovieService {
 
         return moviePosterDtos;
     }
+
+    public List<MoviePosterDto> getGerneMovies(int pageNumber, int pageSize, String genre) {
+        long startTime = System.currentTimeMillis();
+        PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Movie> moviesPage = movieRepository.findAllSortedByGerne(genre,pageable);
+        System.out.println("Page retrieval time: " + (System.currentTimeMillis() - startTime) + " ms");
+
+        startTime = System.currentTimeMillis();
+        List<MoviePosterDto> moviePosterDtos = movieToMoviePosterDto(moviesPage.getContent());
+        System.out.println("Poster DTO conversion time: " + (System.currentTimeMillis() - startTime) + " ms");
+
+        return moviePosterDtos;
+    }
+
+
+
 
 
     public List<MoviePosterDto> getAllMovies(int pageNumber, int pageSize) {

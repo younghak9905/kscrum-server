@@ -45,5 +45,13 @@ public class DBupdateController {
 
         return ResponseEntity.ok().build();
     }
+    @PostMapping("/save-poster")
+    public ResponseEntity<Void> updateMoviePosters(@RequestParam Long movieId){
+
+
+        dbupdateService.updateMoviePoster(movieId);
+
+        return ResponseEntity.ok().build();
+    }
 
 }

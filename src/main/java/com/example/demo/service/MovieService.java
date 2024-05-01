@@ -99,11 +99,18 @@ public class MovieService {
         //List<Movie> randomMovies = movieRepository.findRandomMovie();
 
         List<MoviePosterDto> moviePosterDtos = new ArrayList<>();
-        List<Genre> movieGenres = findAllGenres();
+//        List<Genre> movieGenres = findAllGenres();
+        List<String> movieGenres = new ArrayList<String>(Arrays.asList("Drama", "Thriller", "Action", "Animation", "Romance", "Comedy"));
 
-        for (Genre genre : movieGenres) {
-            List<Movie> randomMovies = movieRepository.findRandomMoviesByGenre(genre.getGenreName());
-            moviePosterDtos.addAll(movieToMoviePosterDto(randomMovies));
+        for (String genre : movieGenres) {
+            System.out.println("Genre: " + genre);
+            if(genre.equals("Romance")){ // 로맨스는 영화가 별로 없어서 년도 기준 뺐습니다.
+                List<Movie> randomMovies = movieRepository.findRandomMoviesByRomance(genre);
+                moviePosterDtos.addAll(movieToMoviePosterDto(randomMovies));
+            } else {
+                List<Movie> randomMovies = movieRepository.findRandomMoviesByGenre(genre);
+                moviePosterDtos.addAll(movieToMoviePosterDto(randomMovies));
+            }
         }
 
         return moviePosterDtos;

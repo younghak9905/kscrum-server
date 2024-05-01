@@ -1,0 +1,26 @@
+version: '3.3'
+
+services:
+  backend:
+    stdin_open: true
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile.Backend
+    container_name: movie-backend-1
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src:/app/src
+      - ./gradle:/app/gradle
+      - ./build:/app/build
+      - ./gradlew:/app/gradlew
+      - ./gradlew.bat:/app/gradlew.bat
+      - ./build.gradle:/app/build.gradle
+      - ./settings.gradle:/app/settings.gradle
+    environment:
+      - tmdb.api.key=${TMDB_API_KEY}
+      - DB.URL=${DB_URL}
+      - DB.USERNAME=${DB_USERNAME}
+      - DB.PASSWORD=${DB_PASSWORD}
+    restart: always

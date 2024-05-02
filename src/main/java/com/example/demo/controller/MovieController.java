@@ -1,9 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.domain.dto.MovieChoiceRequestDto;
-import com.example.demo.domain.dto.MovieDto;
-import com.example.demo.domain.dto.MoviePosterDto;
-import com.example.demo.domain.dto.MovieResponseDto;
+import com.example.demo.domain.dto.*;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.repository.MovieRepository;
 import com.example.demo.service.DBupdateService;
@@ -44,6 +41,11 @@ public class MovieController {
     public ResponseEntity<List<MoviePosterDto>> choiceMovie() {
         return ResponseEntity.ok(movieService.choiceRandomMovies());
     }
+    @GetMapping("/choice/gerne")
+    public ResponseEntity<MovieGenreDto> choiceGerneMovie(@RequestParam(
+            value = "genre", defaultValue = "action") String genre) {
+        return ResponseEntity.ok(movieService.choiceRandomMovies(genre));
+    }
 
     @GetMapping("/posters")
     public ResponseEntity<List<MoviePosterDto>> listMovies(@RequestParam(value = "page", defaultValue = "0") int page,
@@ -55,6 +57,13 @@ public class MovieController {
     public ResponseEntity<List<MoviePosterDto>> listAllMovies(@RequestParam(value = "page", defaultValue = "0") int page,
                                                            @RequestParam(value = "size", defaultValue = "8") int size) {
         return ResponseEntity.ok(movieService.getAllMovies(page, size));
+    }
+
+    @GetMapping("/genre")
+    public ResponseEntity<List<MoviePosterDto>> listGenreMovies(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                                @RequestParam(value = "size", defaultValue = "8") int size,
+                                                                 @RequestParam(value = "genre", defaultValue = "action") String genre) {
+        return ResponseEntity.ok(movieService.getGerneMovies(page, size, genre));
     }
 
     @GetMapping("/posters/test")

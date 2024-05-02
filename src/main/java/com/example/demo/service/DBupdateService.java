@@ -149,7 +149,7 @@ public class DBupdateService {
             // 페이지 요청 생성: 각 반복에서 페이지 크기는 100으로 고정
             Pageable pageable = PageRequest.of((startIndex / 100) + i, 100);
             Page<Movie> moviePage = movieRepository.findAll(pageable);
-
+           // Page<Movie> moviePage = movieRepository.findMovieByposterUrlIsNull(pageable);
             // 페이지별로 영화 포스터 URL 업데이트
             List<Movie> updatedMovies = moviePage.getContent().stream()
                     .map(this::updateMoviePoster)
@@ -172,6 +172,15 @@ public class DBupdateService {
             movie.setPosterUrl(posterUrl);
         }
         return movie;
+    }
+    public void updateMoviePoster(Long movieId) {
+        Movie movie = movieRepository.findByMovieId(movieId).orElseThrow();
+        Long tmdbId = movieService.getTmdbId(movie);
+        if (tmdbId != null) {
+            String posterUrl = tmdbClient.getPosterUrl(tmdbId);
+            movie.setPosterUrl(posterUrl);
+        }
+        movieRepository.save(movie);
     }
 
 

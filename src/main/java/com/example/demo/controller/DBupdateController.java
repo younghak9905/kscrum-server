@@ -4,10 +4,7 @@ import com.example.demo.service.DBupdateService;
 import com.example.demo.service.MovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/db")
@@ -52,6 +49,27 @@ public class DBupdateController {
         dbupdateService.updateMoviePoster(movieId);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset/prority")
+    public ResponseEntity<Void> resetPriority() {
+        dbupdateService.resetPriority();
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/title")
+    public ResponseEntity<String> getTitle(@RequestParam String title) {
+        return ResponseEntity.ok(dbupdateService.getTitleByTitle(title));
+    }
+    @PostMapping("/update/title")
+    public ResponseEntity<Void> updateTitle(@RequestParam String title, @RequestParam Long movieId) {
+        dbupdateService.updateTitle(title);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/movieId")
+    public ResponseEntity<String> getTitle(@RequestParam Long movieId) {
+        return ResponseEntity.ok(dbupdateService.getTitleByMovieId(movieId));
     }
 
 }

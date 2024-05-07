@@ -3,6 +3,8 @@ package com.example.demo.domain.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -23,6 +25,7 @@ public class Ratings {
 
     @ManyToOne
     @JoinColumn(name = "movie_id") // 데이터베이스의 실제 컬럼 이름과 일치시켜야 합니다.
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Movie movieId;
 
     private Long rating;

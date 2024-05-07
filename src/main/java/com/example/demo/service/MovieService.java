@@ -3,26 +3,23 @@ package com.example.demo.service;
 import com.example.demo.domain.dto.MovieChoiceRequestDto;
 import com.example.demo.domain.dto.MovieGenreDto;
 import com.example.demo.domain.dto.MoviePosterDto;
+import com.example.demo.domain.dto.MovieRecommendDto;
 import com.example.demo.domain.entity.*;
 import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,40 +50,49 @@ public class MovieService {
         List<Movie> movies = movieRepository.findByMovieIdIn(movieIds);
         List<String> movieTitles = new ArrayList<>();
         for (Movie movie : movies) {
-            movieTitles.add(movie.getTitle());
+            String titleWithoutYear = movie.getTitle().replaceAll("\\s*\\(\\d{4}\\)$", "");
+            movieTitles.add(titleWithoutYear);
         }
+        System.out.println("Movie titles: " + movieTitles);
 
         getRecommendationsAsync(movieTitles).thenAccept(recommendations -> {
             System.out.println("Recommendations: " + recommendations);
-
+            List<String> movieTitlesToSave = recommendations.stream()
+                    .map(MovieRecommendDto::getTitle)
+                    .collect(Collectors.toList());
             // 비동기적으로 받은 추천 영화 처리
-            updateMoviePriorities(recommendations);
+            updateMoviePriorities(movieTitlesToSave);
+            System.out.println("Movie priorities updated");
         });
     }
 
 
     @Async
-    public CompletableFuture<List<String>> getRecommendationsAsync(List<String> movieTitles) {
-        String url = "/api/recommendation";
-        System.out.println("Calling API URL: " + url);
+    public CompletableFuture<List<MovieRecommendDto>> getRecommendationsAsync(List<String> movieTitles) {
+        String url = "http://4.246.130.162:2222/recommendations";
 
-        return webClient.post()
-                .uri(url)
-                .bodyValue(movieTitles)
-                .retrieve()
+        // 쿼리 파라미터로 영화 제목 목록을 추가
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
+                .queryParam("movie_titles", String.join(",", movieTitles)); // 리스트를 콤마로 구분된 문자열로 변환
+        System.out.println("URL: " + uriBuilder.toUriString());
+        return webClient.get() // GET 메서드 사용
+                .uri(uriBuilder.build().encode().toUri()) // URI에 쿼리 파라미터 포함시키고, URL 인코딩 수행
+                .retrieve() // 응답 본문을 검색
                 .onStatus(
                         status -> status.is4xxClientError() || status.is5xxServerError(),
                         response -> Mono.error(new RuntimeException("API call failed with status: " + response.statusCode()))
                 )
-                .bodyToMono(new ParameterizedTypeReference<List<String>>() {
-                })
-                .doOnError(error -> System.out.println("API call error: " + error.getMessage()))
-                .toFuture();
+                .bodyToMono(new ParameterizedTypeReference<List<MovieRecommendDto>>() {}) // 응답 본문을 List<String>으로 변환
+                .doOnError(error -> System.out.println("API call error: " + error.getMessage())) // 에러 발생 시 로깅
+                .toFuture(); // CompletableFuture로 변환
     }
+
 
     @Async
     public void updateMoviePriorities(List<String> recommendations) {
+        System.out.println(recommendations);
         List<Movie> movies = movieRepository.findByTitleIn(recommendations);
+
         movies.forEach(movie -> {
             movie.setPriority(movie.getPriority() == null ? 1 : movie.getPriority() + 1);
             movie.setUpdateDate(LocalDateTime.now());

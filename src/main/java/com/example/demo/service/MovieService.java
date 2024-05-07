@@ -91,7 +91,16 @@ public class MovieService {
     @Async
     public void updateMoviePriorities(List<String> recommendations) {
         System.out.println(recommendations);
-        List<Movie> movies = movieRepository.findByTitleIn(recommendations);
+        List<Movie> movies = new ArrayList<>();
+        for (String title : recommendations) {
+            Movie movie = movieRepository.findByTitleContaining(title).stream()
+                    .filter(m -> !recommendations.contains(m.getTitle())) // 추천 영화 목록에 없는 영화만 선택
+                    .findFirst()
+                    .orElse(null);
+            if (movie != null) {
+                movies.add(movie);
+            }
+        }
 
         movies.forEach(movie -> {
             movie.setPriority(movie.getPriority() == null ? 1 : movie.getPriority() + 1);

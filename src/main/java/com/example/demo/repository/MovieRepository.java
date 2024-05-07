@@ -51,4 +51,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findRandomMoviesByRomance(@Param("genre") String genre);
     @Query("SELECT m FROM Movie m WHERE m.posterUrl IS NULL")
     Page<Movie> findMovieByposterUrlIsNull(Pageable pageable);
+
+    List<Movie> findByTitleContaining(String title);
 }

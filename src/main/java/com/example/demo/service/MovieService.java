@@ -73,7 +73,7 @@ public class MovieService {
 
         // 쿼리 파라미터로 영화 제목 목록을 추가
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
-                .queryParam("movie_titles", String.join(",", movieTitles)); // 리스트를 콤마로 구분된 문자열로 변환
+                .queryParam("movie_titles", String.join(", ", movieTitles)); // 리스트를 콤마로 구분된 문자열로 변환
         System.out.println("URL: " + uriBuilder.toUriString());
         return webClient.get() // GET 메서드 사용
                 .uri(uriBuilder.build().encode().toUri()) // URI에 쿼리 파라미터 포함시키고, URL 인코딩 수행

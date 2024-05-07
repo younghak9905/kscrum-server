@@ -53,4 +53,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     Page<Movie> findMovieByposterUrlIsNull(Pageable pageable);
 
     List<Movie> findByTitleContaining(String title);
+
+@Query("SELECT m FROM Movie m WHERE m.priority IS NOT NULL")
+    List<Movie> findPriorityIsNotNull();
 }

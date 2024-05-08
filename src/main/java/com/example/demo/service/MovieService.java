@@ -6,23 +6,18 @@ import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.entity.*;
 import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +36,8 @@ public class MovieService {
     private final TmdbClient tmdbClient;
 
     private final PosterUrlRepository posterUrlRepository;
+
+    private final MarkedMovieRepository markedMovieRepository;
 
 
     public Movie getMovieByMovieId(Long movieId) {
@@ -252,6 +249,33 @@ public class MovieService {
 
         return moviesPage.getContent();
 
+
+    }
+
+    public void addMarkedMovie(Long movieId) {
+        Optional<Movie> findMovie = movieRepository.findByMovieId(movieId);
+        if (findMovie.isPresent()) {
+            try {
+                MarkedMovie markedMovie = new MarkedMovie();
+                markedMovie.setMovie(findMovie.get());
+                markedMovieRepository.save(markedMovie);
+            } catch (Exception e) {
+                // 저장 실패 시 예외 처리
+                throw new RuntimeException("Favorites movie could not be saved.", e);
+            }
+        } else {
+            // 영화를 찾지 못했을 때의 처리
+            throw new IllegalArgumentException("Movie with ID " + movieId + " not found.");
+        }
+    }
+
+    public List<MoviePosterDto> getMarkedMovies(){
+        List<MarkedMovie> movieList = markedMovieRepository.findAll();
+        Set<Movie> uniqueMovies = new HashSet<>();
+        for (MarkedMovie markedMovie : movieList) {
+            uniqueMovies.add(markedMovie.getMovie());
+        }
+        return movieToMoviePosterDto(new ArrayList<>(uniqueMovies));
 
     }
 }

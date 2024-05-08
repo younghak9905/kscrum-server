@@ -24,3 +24,20 @@ services:
       - DB.USERNAME=${DB_USERNAME}
       - DB.PASSWORD=${DB_PASSWORD}
     restart: always
+
+  mysql:
+      image: mysql:5.7
+      container_name: movie-mysql-db
+      environment:
+        MYSQL_ROOT_PASSWORD: password
+        MYSQL_DATABASE: moviedb
+        MYSQL_USER: ${DB_USERNAME}
+        MYSQL_PASSWORD: ${DB_PASSWORD}
+      volumes:
+        - mysql-db:/var/lib/mysql
+      ports:
+        - "3306:3306"
+      restart: always
+
+volumes:
+  mysql-db:

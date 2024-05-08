@@ -2,12 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.domain.dto.*;
 import com.example.demo.domain.entity.Movie;
-import com.example.demo.repository.MovieRepository;
-import com.example.demo.service.DBupdateService;
 import com.example.demo.service.MovieService;
-import com.example.demo.service.TmdbClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,8 +38,8 @@ public class MovieController {
     public ResponseEntity<List<MoviePosterDto>> choiceMovie() {
         return ResponseEntity.ok(movieService.choiceRandomMovies());
     }
-    @GetMapping("/choice/gerne")
-    public ResponseEntity<MovieGenreDto> choiceGerneMovie(@RequestParam(
+    @GetMapping("/choice/genre")
+    public ResponseEntity<MovieGenreDto> choiceGenreMovie(@RequestParam(
             value = "genre", defaultValue = "action") String genre) {
         return ResponseEntity.ok(movieService.choiceRandomMovies(genre));
     }
@@ -72,6 +69,20 @@ public class MovieController {
         return ResponseEntity.ok(movieService.getMoviesTest(page, size));
     }
 
+    @PostMapping("/mark/{movieId}")
+    public ResponseEntity<String> addMarkedMovie(@RequestParam(value = "movieId") Long movieId) {
+        try {
+            movieService.addMarkedMovie(movieId);
+            return ResponseEntity.ok().body("Success to mark movie");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to mark movie.");
+        }
+    }
+
+    @GetMapping("/mark")
+    public ResponseEntity<List<MoviePosterDto>> getMarkedMovie() {
+        return ResponseEntity.ok(movieService.getMarkedMovies());
+    }
 
 }
 

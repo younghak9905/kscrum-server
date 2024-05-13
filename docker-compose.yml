@@ -29,7 +29,7 @@ services:
       image: mysql:5.7
       container_name: movie-mysql-db
       environment:
-        MYSQL_ROOT_PASSWORD: password
+        MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
         MYSQL_DATABASE: moviedb
         MYSQL_USER: ${DB_USERNAME}
         MYSQL_PASSWORD: ${DB_PASSWORD}

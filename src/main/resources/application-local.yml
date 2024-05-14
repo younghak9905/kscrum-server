@@ -37,3 +37,6 @@ spring:
       order_updates: true
       batch_versioned_data: true
     show-sql: false
+ML:
+  api:
+    url: ${ML.API.URL}

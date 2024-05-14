@@ -7,6 +7,7 @@ import com.example.demo.domain.dto.MovieRecommendDto;
 import com.example.demo.domain.entity.*;
 import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +43,9 @@ public class MovieService {
     private final MarkedMovieRepository markedMovieRepository;
 
 
+    @Value("${ML.api.url}")
+    String url;
+
     public Movie getMovieByMovieId(Long movieId) {
         return movieRepository.findByMovieId(movieId).orElse(null);
     }
@@ -71,11 +75,11 @@ public class MovieService {
 
     @Async
     public CompletableFuture<List<MovieRecommendDto>> getRecommendationsAsync(List<String> movieTitles) {
-        String url = "http://4.246.130.162:2222/recommendations";
+
 
         // 쿼리 파라미터로 영화 제목 목록을 추가
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
-                .queryParam("movie_titles", String.join(", ", movieTitles)); // 리스트를 콤마로 구분된 문자열로 변환
+                .queryParam("movie_titles", String.join("| ", movieTitles)); // 리스트를 콤마로 구분된 문자열로 변환
         System.out.println("URL: " + uriBuilder.toUriString());
         return webClient.get() // GET 메서드 사용
                 .uri(uriBuilder.build().encode().toUri()) // URI에 쿼리 파라미터 포함시키고, URL 인코딩 수행

@@ -11,6 +11,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -182,10 +183,10 @@ public class MovieService {
         return moviePosterDtos;
     }
 
-    public List<MoviePosterDto> getGerneMovies(int pageNumber, int pageSize, String genre) {
+    public List<MoviePosterDto> getGenreMovies(int pageNumber, int pageSize, String genre) {
         long startTime = System.currentTimeMillis();
         PageRequest pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Movie> moviesPage = movieRepository.findAllSortedByGerne(genre,pageable);
+        Page<Movie> moviesPage = movieRepository.findAllSortedByGenre(genre,pageable);
         System.out.println("Page retrieval time: " + (System.currentTimeMillis() - startTime) + " ms");
 
         startTime = System.currentTimeMillis();
@@ -215,6 +216,7 @@ public class MovieService {
         System.out.println("Movie to Poster DTO processing time: " + (System.currentTimeMillis() - startTime) + " ms");
         return result;
     }
+
 
     private MoviePosterDto createMoviePosterDto(Movie movie) {
         long startTime = System.currentTimeMillis();
@@ -296,7 +298,27 @@ public class MovieService {
             uniqueMovies.add(markedMovie.getMovie());
         }
         return movieToMoviePosterDto(new ArrayList<>(uniqueMovies));
-
     }
+
+    public List<MoviePosterDto> search(int pageNumber, int pageSize, String type, String keyword, String filterType, String ordering) {
+        PageRequest pageable;
+        Page<Movie> moviesPage;
+        if(type.equals("genre")){
+            if(ordering.equals("desc"))
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, filterType));
+            else
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, filterType));
+            moviesPage = movieRepository.findAllSortedByGenre(keyword, pageable);
+            return movieToMoviePosterDto(moviesPage.getContent());
+        } else {
+            if(ordering.equals("desc"))
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, filterType));
+            else
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, filterType));
+            moviesPage = movieRepository.findAllByTitleContaining(keyword, pageable);
+        }
+        return movieToMoviePosterDto(moviesPage.getContent());
+    }
+
 }
 

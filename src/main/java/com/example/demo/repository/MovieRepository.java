@@ -39,7 +39,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     Page<Movie> findAllSortedByPriorityAndUpdateDate(Pageable pageable);
 
     @Query("SELECT m FROM Movie m WHERE m.genres = :genre ORDER BY m.priority DESC NULLS LAST, m.updateDate DESC NULLS LAST")
-    Page<Movie> findAllSortedByGerne(@Param("genre") String genre,Pageable pageable);
+    Page<Movie> findAllSortedByGenre(@Param("genre") String genre,Pageable pageable);
 
     @Query(value = "SELECT m FROM Movie m ORDER BY RAND() LIMIT 4", nativeQuery = true)
     List<Movie> findRandomMovie();
@@ -53,6 +53,8 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     Page<Movie> findMovieByposterUrlIsNull(Pageable pageable);
 
     List<Movie> findByTitleContaining(String title);
+
+    Page<Movie> findAllByTitleContaining(String title, Pageable pageable);
 
 @Query("SELECT m FROM Movie m WHERE m.priority IS NOT NULL")
     List<Movie> findPriorityIsNotNull();

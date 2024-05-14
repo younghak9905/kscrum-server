@@ -60,7 +60,7 @@ public class MovieController {
     public ResponseEntity<List<MoviePosterDto>> listGenreMovies(@RequestParam(value = "page", defaultValue = "0") int page,
                                                                 @RequestParam(value = "size", defaultValue = "8") int size,
                                                                  @RequestParam(value = "genre", defaultValue = "action") String genre) {
-        return ResponseEntity.ok(movieService.getGerneMovies(page, size, genre));
+        return ResponseEntity.ok(movieService.getGenreMovies(page, size, genre));
     }
 
     @GetMapping("/posters/test")
@@ -83,6 +83,20 @@ public class MovieController {
     public ResponseEntity<List<MoviePosterDto>> getMarkedMovie() {
         return ResponseEntity.ok(movieService.getMarkedMovies());
     }
+
+    @GetMapping("/search/{type}")
+    public ResponseEntity<List<MoviePosterDto>> searchMovie(@PathVariable(required = false) String type,
+                                                            @RequestParam(value = "page", defaultValue = "0") int page,
+                                                            @RequestParam(value = "size", defaultValue = "8") int size,
+                                                            @RequestParam(value = "filterType", defaultValue = "year") String filterType,
+                                                            @RequestParam(value = "ordering", defaultValue = "desc") String ordering,
+                                                            @RequestParam(value = "keyword") String keyword) {
+        return ResponseEntity.ok(movieService.search(page, size, type, keyword, filterType, ordering));
+    }
+
+
+
+
 
 }
 

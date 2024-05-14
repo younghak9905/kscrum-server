@@ -25,6 +25,7 @@ services:
       - DB.URL=${DB_URL}
       - DB.USERNAME=${DB_USERNAME}
       - DB.PASSWORD=${DB_PASSWORD}
+      - ML.API.URL=${ML_API_URL}
     restart: always
 
   mysql:

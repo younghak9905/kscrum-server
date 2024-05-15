@@ -188,6 +188,7 @@ public class DBupdateService {
         List<Movie> movies = movieRepository.findPriorityIsNotNull();
         for (Movie movie : movies) {
             movie.setPriority(null);
+            movie.setUpdateDate(null);
         }
         movieRepository.saveAll(movies);
     }

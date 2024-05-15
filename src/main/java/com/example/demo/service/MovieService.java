@@ -111,9 +111,12 @@ public class MovieService {
         }
 
         movies.forEach(movie -> {
-            movie.setPriority(movie.getPriority() == null ? 1 : movie.getPriority() + 1);
-            movie.setUpdateDate(LocalDateTime.now());
-            System.out.println("Movie: " + movie.getTitle() + ", Priority: " + movie.getPriority());
+            int movieYear = Integer.parseInt(movie.getYear());
+            if (movieYear >= 2000) {
+                movie.setPriority(movie.getPriority() == null ? 1 : movie.getPriority() + 1);
+                movie.setUpdateDate(LocalDateTime.now());
+                System.out.println("Movie: " + movie.getTitle() + ", Priority: " + movie.getPriority());
+            }
         });
         movieRepository.saveAll(movies);
 

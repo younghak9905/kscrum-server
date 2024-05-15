@@ -34,12 +34,12 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     @Query("SELECT m FROM Movie m ORDER BY m.priority DESC NULLS LAST, m.updateDate DESC NULLS LAST")
     List<Movie> findAllSortedByPriorityAndUpdateDate();
-
     @Query("SELECT m FROM Movie m " +
             "ORDER BY " +
             "CASE WHEN m.priority IS NULL THEN 1 ELSE 0 END, m.priority DESC, " +
             "CASE WHEN m.updateDate IS NULL THEN 1 ELSE 0 END, m.updateDate DESC, " +
-            "m.year DESC")
+            "m.year DESC, " +
+            "FUNCTION('RAND')")
     Page<Movie> findAllSortedByPriorityAndUpdateDate(Pageable pageable);
 
     @Query("SELECT m FROM Movie m WHERE m.genres = :genre ORDER BY m.priority DESC NULLS LAST, m.updateDate DESC NULLS LAST")

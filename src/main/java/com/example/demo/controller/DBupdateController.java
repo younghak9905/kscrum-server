@@ -67,6 +67,7 @@ public class DBupdateController {
         return ResponseEntity.ok().build();
     }
 
+
     @GetMapping("/movieId")
     public ResponseEntity<String> getTitle(@RequestParam Long movieId) {
         return ResponseEntity.ok(dbupdateService.getTitleByMovieId(movieId));

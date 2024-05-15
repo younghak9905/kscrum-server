@@ -44,7 +44,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     @Query(value = "SELECT m FROM Movie m ORDER BY RAND() LIMIT 4", nativeQuery = true)
     List<Movie> findRandomMovie();
 
-    @Query(value = "SELECT * FROM (SELECT * FROM movies WHERE genres = :genre AND year >= 2013 ORDER BY RAND() LIMIT 4) AS subquery", nativeQuery = true)
+    @Query(value = "SELECT * FROM (SELECT * FROM movies WHERE genres LIKE %:genre% AND year >= 2013 ORDER BY RAND() LIMIT 4) AS subquery", nativeQuery = true)
     List<Movie> findRandomMoviesByGenre(@Param("genre") String genre);
 
     @Query(value = "SELECT * FROM (SELECT * FROM movies WHERE genres = :genre ORDER BY RAND() LIMIT 4) AS subquery", nativeQuery = true)

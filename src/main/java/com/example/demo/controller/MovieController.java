@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.domain.dto.*;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.service.MovieService;
+import com.example.demo.service.RecommandService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,8 @@ import java.util.List;
 public class MovieController {
 
     private final MovieService movieService;
+
+    private final RecommandService recommandService;
 
 
 
@@ -98,6 +101,13 @@ public class MovieController {
         return ResponseEntity.ok(movieService.search(page, size, type, keyword, filterType, ordering));
     }
 
+
+    @Operation(summary = "취향 영화 선택")
+    @PostMapping("/choice/test")
+    public ResponseEntity<Void> choiceMovieTest(@RequestBody MovieChoiceRequestDto dto) {
+        recommandService.choiceMovie(dto);
+        return ResponseEntity.ok().build();
+    }
 
 
 

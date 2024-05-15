@@ -184,4 +184,31 @@ public class DBupdateService {
     }
 
 
+    public void resetPriority() {
+        List<Movie> movies = movieRepository.findPriorityIsNotNull();
+        for (Movie movie : movies) {
+            movie.setPriority(null);
+            movie.setUpdateDate(null);
+        }
+        movieRepository.saveAll(movies);
+    }
+
+    public String getTitleByTitle(String title) {
+        List<Movie> movies = movieRepository.findByTitleContaining(title);
+       return movies.get(0).getTitle();
+
+    }
+
+    public String getTitleByMovieId(Long movieId) {
+        return movieRepository.findByMovieId(movieId).get().getTitle();
+    }
+
+    public void updateTitle(String title) {
+        List<Movie> movies = movieRepository.findByTitleContaining(title);
+        for (Movie movie : movies) {
+            movie.setTitle("The " + title.substring(0, title.length() - 12));
+        }
+        movieRepository.saveAll(movies);
+
+    }
 }

@@ -77,7 +77,7 @@ public class MovieService {
     @Async
     public CompletableFuture<List<MovieRecommendDto>> getRecommendationsAsync(List<String> movieTitles) {
 
-        String movieTitlesParam = String.join("|", movieTitles);
+        String movieTitlesParam = String.join("| ", movieTitles);
         // 쿼리 파라미터로 영화 제목 목록을 추가
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
                 .queryParam("movie_titles", movieTitlesParam); // 리스트를 파이프로 구분된 문자열로 변환

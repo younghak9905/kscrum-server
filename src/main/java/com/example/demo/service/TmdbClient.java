@@ -55,6 +55,7 @@ public class TmdbClient {
         try {
             String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/movie/" + movieId)
                     .queryParam("api_key", apiKey)
+                    .queryParam("language", "ko-KR")
                     .toUriString();
             return restTemplate.getForObject(url, MovieDto.class);
         } catch (HttpClientErrorException.NotFound ex) {

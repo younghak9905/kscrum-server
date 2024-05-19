@@ -109,6 +109,13 @@ public class MovieController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "영화 상세보기")
+    @GetMapping("/details/{movieId}")
+    public ResponseEntity<MovieDto> getMovieDetails(@PathVariable Long movieId) {
+        return ResponseEntity.ok(movieService.getMovieDetails(movieId));
+    }
+
+
 
 
 

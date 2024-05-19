@@ -1,9 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.domain.dto.MovieChoiceRequestDto;
-import com.example.demo.domain.dto.MovieGenreDto;
-import com.example.demo.domain.dto.MoviePosterDto;
-import com.example.demo.domain.dto.MovieRecommendDto;
+import com.example.demo.domain.dto.*;
 import com.example.demo.domain.entity.*;
 import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -319,5 +316,13 @@ public class MovieService {
         return movieToMoviePosterDto(moviesPage.getContent());
     }
 
+    public MovieDto getMovieDetails(Long movieId) {
+
+        Long tmdbId = getTmdbId(movieRepository.findByMovieId(movieId).orElse(null));
+        if (tmdbId != null) {
+            return tmdbClient.getMovieDetails(tmdbId);
+        }
+        return null;
+    }
 }
 

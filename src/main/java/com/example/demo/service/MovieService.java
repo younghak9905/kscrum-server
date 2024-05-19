@@ -317,8 +317,8 @@ public class MovieService {
     }
 
     public MovieDto getMovieDetails(Long movieId) {
-
-        Long tmdbId = getTmdbId(movieRepository.findByMovieId(movieId).orElse(null));
+        Movie movie = movieRepository.findByMovieId(movieId).orElse(null);
+        Long tmdbId = getTmdbId(movie);
         if (tmdbId != null) {
             return tmdbClient.getMovieDetails(tmdbId);
         }

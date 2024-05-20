@@ -316,11 +316,23 @@ public class MovieService {
         return movieToMoviePosterDto(moviesPage.getContent());
     }
 
-    public MovieDto getMovieDetails(Long movieId) {
+    public MovieDetailDto getMovieDetails(Long movieId) {
         Movie movie = movieRepository.findByMovieId(movieId).orElse(null);
         Long tmdbId = getTmdbId(movie);
         if (tmdbId != null) {
-            return tmdbClient.getMovieDetails(tmdbId);
+            MovieDto movieDto = tmdbClient.getMovieDetails(tmdbId);
+            MovieDetailDto result = MovieDetailDto.builder()
+                    .posterPath("https://image.tmdb.org/t/p/w500/"+ movieDto.getPosterPath())
+                    .originalTitle(movieDto.getOriginalTitle())
+                    .title(movieDto.getTitle())
+                    .releaseDate(movieDto.getReleaseDate())
+                    .voteAverage(movieDto.getVoteAverage())
+                    .runtime(movieDto.getRuntime())
+                    .genres(movieDto.getGenres())
+                    .tagline(movieDto.getTagline())
+                    .overview(movieDto.getOverview())
+                    .build();
+            return result;
         }
         return null;
     }

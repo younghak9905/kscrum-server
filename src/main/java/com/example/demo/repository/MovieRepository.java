@@ -42,7 +42,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             "FUNCTION('RAND')")
     Page<Movie> findAllSortedByPriorityAndUpdateDate(Pageable pageable);
 
-    @Query("SELECT m FROM Movie m WHERE m.genres = :genre ORDER BY m.priority DESC NULLS LAST, m.updateDate DESC NULLS LAST")
+    @Query("SELECT m FROM Movie m WHERE m.genres LIKE %:genre% ORDER BY m.priority DESC NULLS LAST, m.updateDate DESC NULLS LAST")
     Page<Movie> findAllSortedByGenre(@Param("genre") String genre,Pageable pageable);
 
     @Query(value = "SELECT m FROM Movie m ORDER BY RAND() LIMIT 4", nativeQuery = true)

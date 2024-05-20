@@ -34,7 +34,7 @@ public class MovieController {
 @Operation(summary = "취향 영화 선택")
     @PostMapping("/choice")
     public ResponseEntity<Void> choiceMovie(@RequestBody MovieChoiceRequestDto dto) {
-        movieService.choiceMovie(dto);
+        recommandService.choiceMovie(dto);
         return ResponseEntity.ok().build();
     }
 @Operation(summary = "취향 영화 가져오기-장르별로 검색오는 API로 대체됨")

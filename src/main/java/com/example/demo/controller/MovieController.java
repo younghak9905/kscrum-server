@@ -111,11 +111,11 @@ public class MovieController {
 
     @Operation(summary = "영화 상세보기")
     @GetMapping("/details")
-    public ResponseEntity<MovieDto> getMovieDetails(@RequestParam Long movieId) {
+    public ResponseEntity<MovieDetailDto> getMovieDetails(@RequestParam Long movieId) {
         System.out.println("movieId: " + movieId);
-        MovieDto movieDto = movieService.getMovieDetails(movieId);
-        System.out.println("movieDto: " + movieDto.getTitle());
-        return ResponseEntity.ok(movieDto);
+        MovieDetailDto movieDetailDto = movieService.getMovieDetails(movieId);
+        System.out.println("movieDto: " + movieDetailDto.getTitle());
+        return ResponseEntity.ok(movieDetailDto);
     }
 
 

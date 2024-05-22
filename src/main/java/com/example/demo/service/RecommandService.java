@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.domain.dto.MovieChoiceRequestDto;
 import com.example.demo.domain.dto.MovieRecommendDto;
+import com.example.demo.domain.entity.Links;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.repository.LinksRepository;
 import com.example.demo.repository.MovieGenreRepository;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,8 @@ public class RecommandService {
 
     private final WebClient webClient;
 
+    private final LinksRepository linksRepository;
+
     @Value("${ML.api.url}")
     String url;
 
@@ -41,12 +45,15 @@ public class RecommandService {
     public void choiceMovie(MovieChoiceRequestDto dto) {
         List<Long> movieIds = dto.getMovieIds();
         System.out.println("Movie IDs: " + movieIds);
-  //      List<Movie> movies = movieRepository.findByMovieIdIn(movieIds);
+        //
         List<String> movieTitles = new ArrayList<>();
-        for (Long movieId : movieIds) {
-            String titleWithoutYear = movieId.toString();
+        for (Movie movieId : movieRepository.findByMovieIdIn(movieIds)) {
+            Long tmdbId=linksRepository.findByMovieId(movieId).get().getTmdbId();
+            String titleWithoutYear = tmdbId.toString();
             movieTitles.add(titleWithoutYear);
         }
+
+
         System.out.println(movieTitles);
         getRecommendationsAsync(movieTitles).thenAccept(recommendations -> {
             System.out.println("Recommendations: " + recommendations);
@@ -81,7 +88,7 @@ public class RecommandService {
     @Async
     public CompletableFuture<List<MovieRecommendDto>> getRecommendationsAsync(List<String> movieTitles) {
 
-        String movieTitlesParam = String.join(" |", movieTitles);
+        String movieTitlesParam = String.join("|", movieTitles);
         // 쿼리 파라미터로 영화 제목 목록을 추가
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
                 .queryParam("movie_id", movieTitlesParam); // 리스트를 파이프로 구분된 문자열로 변환
@@ -104,17 +111,19 @@ public class RecommandService {
     public void updateMoviePriorities(List<Long> recommendations) {
         System.out.println("recomandations: "+recommendations);
         List<Movie> movies = new ArrayList<>();
-        for (Long movieId : recommendations) {
-            Movie movie = movieRepository.findByMovieId(movieId).stream()
-                    .filter(m -> !recommendations.contains(m.getMovieId())) // 추천 영화 목록에 없는 영화만 선택
-                    .findFirst()
-                    .orElse(null);
-            if (movie != null) {
-                movies.add(movie);
+        for(Long tmdbId: recommendations){
+            Links link=linksRepository.findByTmdbId(tmdbId);
+            if(link==null){
+                continue;
             }
+
+          movies.add(link.getMovieId());
         }
 
+
+
         movies.forEach(movie -> {
+            System.out.println("Movie: " + movie.getTitle()+ ", Year: " + movie.getYear()+"id: "+movie.getMovieId());
             int movieYear = Integer.parseInt(movie.getYear());
             if (movieYear >= 2000) {
                 movie.setPriority(movie.getPriority() == null ? 1 : movie.getPriority() + 1);

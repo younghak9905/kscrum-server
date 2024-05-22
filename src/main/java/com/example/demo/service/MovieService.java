@@ -257,5 +257,13 @@ public class MovieService {
     public List<MoviePosterDto> getMarkedMovies() {
         return movieToMoviePosterDto(new ArrayList<>( markedService.getMarkedMovies()));
     }
+
+    public MoviePosterDto getMovieDetailsInDB(Long movieId) {
+        Movie movie = movieRepository.findByMovieId(movieId).orElse(null);
+        if (movie != null) {
+            return new MoviePosterDto(movie, getPosterUrl(movie));
+        }
+        return null;
+    }
 }
 

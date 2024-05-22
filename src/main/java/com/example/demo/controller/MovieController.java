@@ -128,6 +128,15 @@ public class MovieController {
         return ResponseEntity.ok(movieDetailDto);
     }
 
+    @Operation(summary = "영화 상세보기 in DB")
+    @GetMapping("/details/db/{movieId}")
+    public ResponseEntity<MoviePosterDto> getMovieDetailsInDB(@PathVariable Long movieId) {
+        System.out.println("movieId: " + movieId);
+        MoviePosterDto movieDetailDto = movieService.getMovieDetailsInDB(movieId);
+        System.out.println("movieDto: " + movieDetailDto.getTitle());
+        return ResponseEntity.ok(movieDetailDto);
+    }
+
 
 
 

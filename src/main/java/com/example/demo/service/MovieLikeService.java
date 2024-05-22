@@ -19,9 +19,6 @@ public class MovieLikeService {
 
     private final LikeMovieRepository likeMovieRepository;
 
-    private final MovieService movieService;
-
-    private final RecommandService recommandService;
 
     public void addLikedMovie(Long movieId) {
         Optional<Movie> findMovie = movieRepository.findByMovieId(movieId);
@@ -42,22 +39,17 @@ public class MovieLikeService {
         }
     }
 
-    public List<MoviePosterDto> getLikedMovies(){
+    public List<Movie> getLikedMovies(){
         List<LikeMovie> movieList = likeMovieRepository.findAll();
         Set<Movie> uniqueMovies = new HashSet<>();
         for (LikeMovie likeMovie : movieList) {
             uniqueMovies.add(likeMovie.getMovie());
         }
-        return movieService.movieToMoviePosterDto(new ArrayList<>(uniqueMovies));
+        return new ArrayList<>(uniqueMovies);
     }
 
-    public boolean isLikedMovie(Long movieId) {
-        Optional<Movie> findMovie = movieRepository.findByMovieId(movieId);
-        if (findMovie.isPresent()) {
-            return likeMovieRepository.existsByMovie(findMovie.get());
-        } else {
-            return false;
-        }
+    public boolean isLikedMovie(Movie movie) {
+         return likeMovieRepository.existsByMovie(movie);
     }
 
     public void removeLikedMovie(Long movieId) {

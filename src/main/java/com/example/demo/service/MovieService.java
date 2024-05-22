@@ -150,8 +150,8 @@ public class MovieService {
     private MoviePosterDto createMoviePosterDto(Movie movie) {
         long startTime = System.currentTimeMillis();
         String posterUrl = getPosterUrl(movie);
-        boolean isMarked =markedService.isMarkedMovie(movie.getMovieId());
-        boolean isLiked = movieLikeService.isLikedMovie(movie.getMovieId());
+        boolean isMarked =markedService.isMarkedMovie(movie);
+        boolean isLiked = movieLikeService.isLikedMovie(movie);
         System.out.println("Create MoviePosterDto time: " + (System.currentTimeMillis() - startTime) + " ms");
         return new MoviePosterDto(movie, posterUrl,isMarked,isLiked);
     }
@@ -246,6 +246,16 @@ public class MovieService {
             return result;
         }
         return null;
+    }
+
+
+
+    public List<MoviePosterDto> getLikedMovies(){
+        return movieToMoviePosterDto(new ArrayList<>( movieLikeService.getLikedMovies()));
+    }
+
+    public List<MoviePosterDto> getMarkedMovies() {
+        return movieToMoviePosterDto(new ArrayList<>( markedService.getMarkedMovies()));
     }
 }
 

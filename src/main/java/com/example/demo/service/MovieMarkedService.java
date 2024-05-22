@@ -17,7 +17,6 @@ public class MovieMarkedService {
 private final MovieRepository movieRepository;
 private final MarkedMovieRepository markedMovieRepository;
 
-private final MovieService movieService;
 
 
     public void addMarkedMovie(Long movieId) {
@@ -37,22 +36,18 @@ private final MovieService movieService;
         }
     }
 
-    public List<MoviePosterDto> getMarkedMovies(){
+    public List<Movie> getMarkedMovies(){
         List<MarkedMovie> movieList = markedMovieRepository.findAll();
         Set<Movie> uniqueMovies = new HashSet<>();
         for (MarkedMovie markedMovie : movieList) {
             uniqueMovies.add(markedMovie.getMovie());
         }
-        return movieService.movieToMoviePosterDto(new ArrayList<>(uniqueMovies));
+        return new ArrayList<>(uniqueMovies);
     }
 
-    public boolean isMarkedMovie(Long movieId) {
-        Optional<Movie> findMovie = movieRepository.findByMovieId(movieId);
-        if (findMovie.isPresent()) {
-            return markedMovieRepository.existsByMovie(findMovie.get());
-        } else {
-            return false;
-        }
+    public boolean isMarkedMovie(Movie movie) {
+       return markedMovieRepository.existsByMovie(movie);
+
     }
 
 }

@@ -91,7 +91,7 @@ public class MovieController {
 @Operation(summary = "나중에 볼 영화 가져오기")
     @GetMapping("/mark")
     public ResponseEntity<List<MoviePosterDto>> getMarkedMovie() {
-        return ResponseEntity.ok(movieMarkedService.getMarkedMovies());
+        return ResponseEntity.ok(movieService.getMarkedMovies());
     }
 @Operation(summary = "검색")
     @GetMapping("/search/{type}")

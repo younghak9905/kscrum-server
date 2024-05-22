@@ -7,6 +7,7 @@ import com.example.demo.repository.MarkedMovieRepository;
 import com.example.demo.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -50,4 +51,14 @@ private final MarkedMovieRepository markedMovieRepository;
 
     }
 
+
+    @Transactional
+    public void removeMarkedMovie(Long movieId) {
+        Optional<Movie> findMovie = movieRepository.findByMovieId(movieId);
+        if (findMovie.isPresent()) {
+            markedMovieRepository.deleteByMovie(findMovie.get());
+        } else {
+            throw new IllegalArgumentException("Movie with ID " + movieId + " not found.");
+        }
+    }
 }

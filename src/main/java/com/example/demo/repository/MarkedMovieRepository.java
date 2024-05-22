@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface MarkedMovieRepository extends JpaRepository<MarkedMovie, Long> {
 
     boolean existsByMovie(Movie movie);
+
+    void deleteByMovie(Movie movie);
 }

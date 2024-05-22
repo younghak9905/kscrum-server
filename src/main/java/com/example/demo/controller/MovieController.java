@@ -88,10 +88,17 @@ public class MovieController {
             return ResponseEntity.internalServerError().body("Failed to mark movie.");
         }
     }
-@Operation(summary = "나중에 볼 영화 가져오기")
+    @Operation(summary = "나중에 볼 영화 가져오기")
     @GetMapping("/mark")
     public ResponseEntity<List<MoviePosterDto>> getMarkedMovie() {
         return ResponseEntity.ok(movieService.getMarkedMovies());
+    }
+
+    @Operation(summary = "나중에 볼 영화 삭제")
+    @DeleteMapping("/mark/{movieId}")
+    public ResponseEntity<Void> removeMarkedMovie(@RequestParam(value = "movieId") Long movieId) {
+        movieMarkedService.removeMarkedMovie(movieId);
+        return ResponseEntity.ok().build();
     }
 @Operation(summary = "검색")
     @GetMapping("/search/{type}")

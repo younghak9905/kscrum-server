@@ -40,13 +40,14 @@ public class RecommandService {
 
     public void choiceMovie(MovieChoiceRequestDto dto) {
         List<Long> movieIds = dto.getMovieIds();
-        List<Movie> movies = movieRepository.findByMovieIdIn(movieIds);
+        System.out.println("Movie IDs: " + movieIds);
+  //      List<Movie> movies = movieRepository.findByMovieIdIn(movieIds);
         List<String> movieTitles = new ArrayList<>();
-        for (Movie movie : movies) {
-            String titleWithoutYear = movie.getMovieId().toString();
+        for (Long movieId : movieIds) {
+            String titleWithoutYear = movieId.toString();
             movieTitles.add(titleWithoutYear);
         }
-
+        System.out.println(movieTitles);
         getRecommendationsAsync(movieTitles).thenAccept(recommendations -> {
             System.out.println("Recommendations: " + recommendations);
             List<Long> movieTitlesToSave = recommendations.stream()
@@ -80,7 +81,7 @@ public class RecommandService {
     @Async
     public CompletableFuture<List<MovieRecommendDto>> getRecommendationsAsync(List<String> movieTitles) {
 
-        String movieTitlesParam = String.join("| ", movieTitles);
+        String movieTitlesParam = String.join(" |", movieTitles);
         // 쿼리 파라미터로 영화 제목 목록을 추가
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
                 .queryParam("movie_id", movieTitlesParam); // 리스트를 파이프로 구분된 문자열로 변환

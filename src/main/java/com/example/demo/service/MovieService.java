@@ -29,7 +29,6 @@ public class MovieService {
 
     private final LinksRepository linksRepository;
 
-
     private final MovieGenreRepository movieGenreRepository;
 
     private final WebClient webClient;
@@ -38,7 +37,10 @@ public class MovieService {
 
     private final PosterUrlRepository posterUrlRepository;
 
-    private final MarkedMovieRepository markedMovieRepository;
+
+    private final MovieLikeService movieLikeService;
+
+    private final MovieMarkedService markedService;
 
 
     @Value("${ML.api.url}")
@@ -49,75 +51,6 @@ public class MovieService {
     }
 
 
-    public void choiceMovie(MovieChoiceRequestDto dto) {
-        List<Long> movieIds = dto.getMovieIds();
-        List<Movie> movies = movieRepository.findByMovieIdIn(movieIds);
-        List<String> movieTitles = new ArrayList<>();
-        for (Movie movie : movies) {
-            String titleWithoutYear = movie.getTitle().replaceAll("\\s*\\(\\d{4}\\)$", "");
-            movieTitles.add(titleWithoutYear);
-        }
-        System.out.println("Movie titles: " + movieTitles);
-
-        getRecommendationsAsync(movieTitles).thenAccept(recommendations -> {
-            System.out.println("Recommendations: " + recommendations);
-            List<String> movieTitlesToSave = recommendations.stream()
-                    .map(MovieRecommendDto::getTitle)
-                    .collect(Collectors.toList());
-            // 비동기적으로 받은 추천 영화 처리
-            updateMoviePriorities(movieTitlesToSave);
-            System.out.println("Movie priorities updated");
-        });
-    }
-
-
-    @Async
-    public CompletableFuture<List<MovieRecommendDto>> getRecommendationsAsync(List<String> movieTitles) {
-
-        String movieTitlesParam = String.join("| ", movieTitles);
-        // 쿼리 파라미터로 영화 제목 목록을 추가
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
-                .queryParam("movie_titles", movieTitlesParam); // 리스트를 파이프로 구분된 문자열로 변환
-        System.out.println("URL: " + uriBuilder.toUriString());
-
-        return webClient.get() // GET 메서드 사용
-                .uri(uriBuilder.build().encode().toUri()) // URI에 쿼리 파라미터 포함시키고, URL 인코딩 수행
-                .retrieve() // 응답 본문을 검색
-                .onStatus(
-                        status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> Mono.error(new RuntimeException("API call failed with status: " + response.statusCode()))
-                )
-                .bodyToMono(new ParameterizedTypeReference<List<MovieRecommendDto>>() {}) // 응답 본문을 List<String>으로 변환
-                .doOnError(error -> System.out.println("API call error: " + error.getMessage())) // 에러 발생 시 로깅
-                .toFuture(); // CompletableFuture로 변환
-    }
-
-
-    @Async
-    public void updateMoviePriorities(List<String> recommendations) {
-        System.out.println(recommendations);
-        List<Movie> movies = new ArrayList<>();
-        for (String title : recommendations) {
-            Movie movie = movieRepository.findByTitleContaining(title).stream()
-                    .filter(m -> !recommendations.contains(m.getTitle())) // 추천 영화 목록에 없는 영화만 선택
-                    .findFirst()
-                    .orElse(null);
-            if (movie != null) {
-                movies.add(movie);
-            }
-        }
-
-        movies.forEach(movie -> {
-            int movieYear = Integer.parseInt(movie.getYear());
-            if (movieYear >= 2000) {
-                movie.setPriority(movie.getPriority() == null ? 1 : movie.getPriority() + 1);
-                movie.setUpdateDate(LocalDateTime.now());
-                System.out.println("Movie: " + movie.getTitle() + ", Priority: " + movie.getPriority());
-            }
-        });
-        movieRepository.saveAll(movies);
-
-    }
 
     public List<MoviePosterDto> choiceRandomMovies() {
         //List<Movie> randomMovies = movieRepository.findRandomMovie();
@@ -217,8 +150,10 @@ public class MovieService {
     private MoviePosterDto createMoviePosterDto(Movie movie) {
         long startTime = System.currentTimeMillis();
         String posterUrl = getPosterUrl(movie);
+        boolean isMarked =markedService.isMarkedMovie(movie.getMovieId());
+        boolean isLiked = movieLikeService.isLikedMovie(movie.getMovieId());
         System.out.println("Create MoviePosterDto time: " + (System.currentTimeMillis() - startTime) + " ms");
-        return new MoviePosterDto(movie, posterUrl);
+        return new MoviePosterDto(movie, posterUrl,isMarked,isLiked);
     }
 
     private String fetchAndSavePosterUrl(Movie movie) {
@@ -270,31 +205,7 @@ public class MovieService {
 
     }
 
-    public void addMarkedMovie(Long movieId) {
-        Optional<Movie> findMovie = movieRepository.findByMovieId(movieId);
-        if (findMovie.isPresent()) {
-            try {
-                MarkedMovie markedMovie = new MarkedMovie();
-                markedMovie.setMovie(findMovie.get());
-                markedMovieRepository.save(markedMovie);
-            } catch (Exception e) {
-                // 저장 실패 시 예외 처리
-                throw new RuntimeException("Favorites movie could not be saved.", e);
-            }
-        } else {
-            // 영화를 찾지 못했을 때의 처리
-            throw new IllegalArgumentException("Movie with ID " + movieId + " not found.");
-        }
-    }
 
-    public List<MoviePosterDto> getMarkedMovies(){
-        List<MarkedMovie> movieList = markedMovieRepository.findAll();
-        Set<Movie> uniqueMovies = new HashSet<>();
-        for (MarkedMovie markedMovie : movieList) {
-            uniqueMovies.add(markedMovie.getMovie());
-        }
-        return movieToMoviePosterDto(new ArrayList<>(uniqueMovies));
-    }
 
     public List<MoviePosterDto> search(int pageNumber, int pageSize, String type, String keyword, String filterType, String ordering) {
         PageRequest pageable;

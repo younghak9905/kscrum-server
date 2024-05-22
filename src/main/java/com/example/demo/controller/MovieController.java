@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.domain.dto.*;
 import com.example.demo.domain.entity.Movie;
+import com.example.demo.service.MovieMarkedService;
 import com.example.demo.service.MovieService;
 import com.example.demo.service.RecommandService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +21,8 @@ public class MovieController {
     private final MovieService movieService;
 
     private final RecommandService recommandService;
+
+    private final MovieMarkedService movieMarkedService;
 
 
 
@@ -79,7 +82,7 @@ public class MovieController {
     @PostMapping("/mark/{movieId}")
     public ResponseEntity<String> addMarkedMovie(@RequestParam(value = "movieId") Long movieId) {
         try {
-            movieService.addMarkedMovie(movieId);
+            movieMarkedService.addMarkedMovie(movieId);
             return ResponseEntity.ok().body("Success to mark movie");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Failed to mark movie.");
@@ -88,7 +91,7 @@ public class MovieController {
 @Operation(summary = "나중에 볼 영화 가져오기")
     @GetMapping("/mark")
     public ResponseEntity<List<MoviePosterDto>> getMarkedMovie() {
-        return ResponseEntity.ok(movieService.getMarkedMovies());
+        return ResponseEntity.ok(movieMarkedService.getMarkedMovies());
     }
 @Operation(summary = "검색")
     @GetMapping("/search/{type}")

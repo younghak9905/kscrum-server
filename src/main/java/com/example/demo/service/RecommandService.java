@@ -59,6 +59,23 @@ public class RecommandService {
     }
 
 
+    public void choiceMovie(Movie likeMovie) {
+
+        List<String> movieTitles = new ArrayList<>();
+        movieTitles.add(likeMovie.getMovieId().toString());
+        getRecommendationsAsync(movieTitles).thenAccept(recommendations -> {
+            System.out.println("Recommendations: " + recommendations);
+            List<Long> movieTitlesToSave = recommendations.stream()
+                    .map(MovieRecommendDto::getMovieId)
+                    .collect(Collectors.toList());
+            // 비동기적으로 받은 추천 영화 처리
+            updateMoviePriorities(movieTitlesToSave);
+            System.out.println("Movie priorities updated");
+        });
+    }
+
+
+
 
     @Async
     public CompletableFuture<List<MovieRecommendDto>> getRecommendationsAsync(List<String> movieTitles) {
@@ -84,7 +101,7 @@ public class RecommandService {
 
     @Async
     public void updateMoviePriorities(List<Long> recommendations) {
-        System.out.println(recommendations);
+        System.out.println("recomandations: "+recommendations);
         List<Movie> movies = new ArrayList<>();
         for (Long movieId : recommendations) {
             Movie movie = movieRepository.findByMovieId(movieId).stream()

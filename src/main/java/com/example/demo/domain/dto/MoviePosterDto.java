@@ -17,6 +17,12 @@ public class MoviePosterDto {
     private String posterPath;
 
     private String url;
+
+    private boolean isMarked;
+
+    private boolean isLiked;
+
+
     @Builder
     public MoviePosterDto(long movieId, String title, String posterPath,String url) {
         this.movieId = movieId;
@@ -38,6 +44,16 @@ public class MoviePosterDto {
         this.title = movie.getTitle();
         this.posterPath = movie.getPosterUrl();
         this.url = "https://image.tmdb.org/t/p/w500"+movie.getPosterUrl();
+
+    }
+
+    public MoviePosterDto(Movie movie, String posterPath,boolean isMarked,boolean isLiked) {
+        this.movieId = movie.getMovieId();
+        this.title = movie.getTitle();
+        this.posterPath = posterPath;
+        this.url = "https://image.tmdb.org/t/p/w500"+posterPath;
+        this.isMarked = isMarked;
+        this.isLiked = isLiked;
 
     }
 }

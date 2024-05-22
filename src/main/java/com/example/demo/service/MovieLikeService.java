@@ -9,6 +9,7 @@ import com.example.demo.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 @Service
@@ -51,7 +52,7 @@ public class MovieLikeService {
     public boolean isLikedMovie(Movie movie) {
          return likeMovieRepository.existsByMovie(movie);
     }
-
+    @Transactional
     public void removeLikedMovie(Long movieId) {
         Optional<Movie> findMovie = movieRepository.findByMovieId(movieId);
         if (findMovie.isPresent()) {

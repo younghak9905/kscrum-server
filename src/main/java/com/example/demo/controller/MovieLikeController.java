@@ -14,14 +14,14 @@ import java.util.List;
 @RequestMapping("/api/movie/like")
 @RequiredArgsConstructor
 public class MovieLikeController {
-    private final MovieLikeService movieMarkedService;
+    private final MovieLikeService movieLikeService;
 
     private final MovieService movieService;
 
     @Operation(summary = "영화 좋아요")
     @PostMapping("/{movieId}")
     public ResponseEntity<Void> likeMovie(@PathVariable long movieId) {
-        movieMarkedService.addLikedMovie(movieId);
+        movieLikeService.addLikedMovie(movieId);
         return ResponseEntity.ok().build();
     }
 
@@ -34,7 +34,7 @@ public class MovieLikeController {
     @Operation(summary="좋아요 취소")
     @DeleteMapping("/{movieId}")
     public ResponseEntity<Void> unlikeMovie(@PathVariable long movieId) {
-        movieMarkedService.removeLikedMovie(movieId);
+        movieLikeService.removeLikedMovie(movieId);
         return ResponseEntity.ok().build();
     }
 }

@@ -119,6 +119,29 @@ public class MovieController {
     }
 
 
+    @Operation(summary = "현재 상영중인 영화 목록")
+    @GetMapping("/now_playing")
+    public ResponseEntity<List<MovieDetailDto>> nowPlayingMovie(@RequestParam(value = "tmdbPage", defaultValue = "1") int tmdbPage,
+                                                                @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                @RequestParam(value = "size", defaultValue = "8") int size
+                                                                ){
+        return ResponseEntity.ok(movieService.getPlayingMovie(tmdbPage, page, size));
+    }
+
+    @Operation(summary = "주차별 인기 영화 목록")
+    @GetMapping("/trending_week")
+    public ResponseEntity<List<MovieDetailDto>> trendingWeekMovie(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                                  @RequestParam(value = "size", defaultValue = "8") int size){
+        return ResponseEntity.ok(movieService.getTrendingMovie("week", page, size));
+    }
+
+    @Operation(summary = "일별 인기 영화 목록")
+    @GetMapping("/trending_day")
+    public ResponseEntity<List<MovieDetailDto>> trendingDayMovie(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                                 @RequestParam(value = "size", defaultValue = "8") int size){
+        return ResponseEntity.ok(movieService.getTrendingMovie("day",page, size));
+    }
+
 
 
 

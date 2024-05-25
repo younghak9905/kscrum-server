@@ -39,11 +39,11 @@ private final MarkedMovieRepository markedMovieRepository;
 
     public List<Movie> getMarkedMovies(){
         List<MarkedMovie> movieList = markedMovieRepository.findAll();
-        Set<Movie> uniqueMovies = new HashSet<>();
+        List<Movie> movies = new ArrayList<>();
         for (MarkedMovie markedMovie : movieList) {
-            uniqueMovies.add(markedMovie.getMovie());
+            movies.add(markedMovie.getMovie());
         }
-        return new ArrayList<>(uniqueMovies);
+        return movies;
     }
 
     public boolean isMarkedMovie(Movie movie) {

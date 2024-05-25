@@ -1,7 +1,5 @@
 package com.example.demo.service;
-import com.example.demo.domain.dto.MovieDto;
-import com.example.demo.domain.dto.MoviePosterDto;
-import com.example.demo.domain.dto.MovieResponseDto;
+import com.example.demo.domain.dto.*;
 import com.example.demo.domain.entity.Links;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.domain.entity.PosterUrl;
@@ -16,6 +14,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
+
+import java.util.List;
 
 @Service
 public class TmdbClient {
@@ -93,6 +93,27 @@ public class TmdbClient {
         return movie.getPosterPath();
     }
 
+    public MovieListDto searchPlayingMovie(int page){
+        String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/movie/now_playing")
+                .queryParam("api_key", apiKey)
+                .queryParam("language", "ko-KR")
+                .queryParam("page", page)
+                .queryParam("region","KR")
+                .toUriString();
+        MovieListDto result = restTemplate.getForObject(url, MovieListDto.class);
+        return result;
+    }
+
+    public MovieListDto searchTrendingMovie(String timeWindow) {
+        String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .path("/trending/movie/{time_window}")
+                .queryParam("api_key", apiKey)
+                .queryParam("language", "ko-KR")
+                .buildAndExpand(timeWindow)
+                .toUriString();
+        MovieListDto result = restTemplate.getForObject(url, MovieListDto.class);
+        return result;
+    }
 
 
 }

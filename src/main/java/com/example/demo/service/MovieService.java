@@ -29,6 +29,7 @@ public class MovieService {
 
     private final LinksRepository linksRepository;
 
+
     private final MovieGenreRepository movieGenreRepository;
 
     private final WebClient webClient;
@@ -150,10 +151,8 @@ public class MovieService {
     private MoviePosterDto createMoviePosterDto(Movie movie) {
         long startTime = System.currentTimeMillis();
         String posterUrl = getPosterUrl(movie);
-        boolean isMarked =markedService.isMarkedMovie(movie);
-        boolean isLiked = movieLikeService.isLikedMovie(movie);
         System.out.println("Create MoviePosterDto time: " + (System.currentTimeMillis() - startTime) + " ms");
-        return new MoviePosterDto(movie, posterUrl,isMarked,isLiked);
+        return new MoviePosterDto(movie, posterUrl);
     }
 
     private String fetchAndSavePosterUrl(Movie movie) {
@@ -248,7 +247,50 @@ public class MovieService {
         return null;
     }
 
+    public static List<MovieDetailDto> getPage(List<MovieDetailDto> list, int pageNumber, int pageSize) {
+        int startIndex = (pageNumber) * pageSize; // 시작 인덱스 계산
+        int endIndex = Math.min(startIndex + pageSize, list.size()); // 끝 인덱스 계산
+        return list.subList(startIndex, endIndex); // 해당 페이지의 데이터 반환
+    }
 
+    public List<MovieDetailDto> getPlayingMovie(int tmdbPage, int pageNumber, int pageSize){
+
+        MovieListDto movies = tmdbClient.searchPlayingMovie(tmdbPage);
+        List<MovieNowPlayingDto> dtos = movies.getResults();
+        List<MovieDetailDto> result = new ArrayList<>();
+        for(MovieNowPlayingDto dto : dtos){
+            result.add(tmdbIdToMovieDetailDto(dto.getId()));
+        }
+        getPage(result, pageNumber, pageSize);
+        return getPage(result, pageNumber, pageSize);
+    }
+
+    public List<MovieDetailDto> getTrendingMovie(String timeWindow, int pageNumber, int pageSize){
+        MovieListDto movies = tmdbClient.searchTrendingMovie(timeWindow);
+        List<MovieNowPlayingDto> dtos = movies.getResults();
+        List<MovieDetailDto> result = new ArrayList<>();
+        for(MovieNowPlayingDto dto : dtos){
+            result.add(tmdbIdToMovieDetailDto(dto.getId()));
+        }
+
+        return getPage(result, pageNumber, pageSize);
+    }
+
+    public MovieDetailDto tmdbIdToMovieDetailDto(Long tmdbId){
+        MovieDto movieDto = tmdbClient.getMovieDetails(tmdbId);
+        MovieDetailDto result = MovieDetailDto.builder()
+                .posterPath("https://image.tmdb.org/t/p/w500/"+ movieDto.getPosterPath())
+                .originalTitle(movieDto.getOriginalTitle())
+                .title(movieDto.getTitle())
+                .releaseDate(movieDto.getReleaseDate())
+                .voteAverage(movieDto.getVoteAverage())
+                .runtime(movieDto.getRuntime())
+                .genres(movieDto.getGenres())
+                .tagline(movieDto.getTagline())
+                .overview(movieDto.getOverview())
+                .build();
+        return result;
+    }
 
     public List<MoviePosterDto> getLikedMovies(){
         return movieToMoviePosterDto(new ArrayList<>( movieLikeService.getLikedMovies()));
@@ -265,5 +307,6 @@ public class MovieService {
         }
         return null;
     }
+}
 }
 

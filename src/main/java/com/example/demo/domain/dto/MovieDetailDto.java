@@ -1,6 +1,7 @@
 package com.example.demo.domain.dto;
 
 import com.example.demo.domain.entity.Genre;
+import com.example.demo.domain.entity.TrendingMovie;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,11 +28,12 @@ public class MovieDetailDto {
     private String genreString;
     private String tagline;
     private String overview;
+    private long id;
 
     @Builder
     public MovieDetailDto(String posterPath, String originalTitle, String title,
                           String releaseDate, double voteAverage, int runtime,
-                          ArrayList genres, String tagline, String overview) {
+                          ArrayList genres, String tagline, String overview, long id) {
         this.posterPath = posterPath;
         this.originalTitle = originalTitle;
         this.title = title;
@@ -41,6 +43,7 @@ public class MovieDetailDto {
         this.genreString = genreToString(genres);
         this.tagline = tagline;
         this.overview = overview;
+        this.id=id;
     }
         
     // arraylist로 들어온 장르를 '액션 / 코미디 / 멜로' 와 같이 바꾸는 메소드
@@ -57,6 +60,19 @@ public class MovieDetailDto {
         }
 
         return result.toString();
+    }
+
+    public MovieDetailDto(TrendingMovie trendingMovie) {
+        this.posterPath = trendingMovie.getPosterPath();
+        this.originalTitle = trendingMovie.getOriginalTitle();
+        this.title = trendingMovie.getTitle();
+        this.releaseDate = trendingMovie.getReleaseDate();
+        this.voteAverage = trendingMovie.getVoteAverage();
+        this.runtime = trendingMovie.getRuntime();
+        this.genreString = trendingMovie.getGenreString();
+        this.tagline = trendingMovie.getTagline();
+        this.overview = trendingMovie.getOverview();
+        this.id = trendingMovie.getId();
     }
 
 

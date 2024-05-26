@@ -7,6 +7,7 @@ import com.example.demo.repository.LinksRepository;
 import com.example.demo.repository.PosterUrlRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
@@ -16,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class TmdbClient {
@@ -114,6 +116,8 @@ public class TmdbClient {
         MovieListDto result = restTemplate.getForObject(url, MovieListDto.class);
         return result;
     }
+
+
 
 
 }

@@ -43,6 +43,8 @@ public class MovieService {
 
     private final MovieMarkedService markedService;
 
+    private final TrendingMovieRepository trendingMovieRepository;
+
 
     @Value("${ML.api.url}")
     String url;
@@ -232,6 +234,7 @@ public class MovieService {
         if (tmdbId != null) {
             MovieDto movieDto = tmdbClient.getMovieDetails(tmdbId);
             MovieDetailDto result = MovieDetailDto.builder()
+                    .id(tmdbId)
                     .posterPath("https://image.tmdb.org/t/p/w500/"+ movieDto.getPosterPath())
                     .originalTitle(movieDto.getOriginalTitle())
                     .title(movieDto.getTitle())
@@ -255,30 +258,59 @@ public class MovieService {
 
     public List<MovieDetailDto> getPlayingMovie(int tmdbPage, int pageNumber, int pageSize){
 
+        List<TrendingMovie> trendingMovies = trendingMovieRepository.findAllByOption("nowPlaying");
+        if(trendingMovies.size() > pageSize){
+            List<MovieDetailDto> result = new ArrayList<>();
+            for(TrendingMovie movie : trendingMovies){
+                result.add(new MovieDetailDto(movie));
+            }
+            return getPage(result, pageNumber, pageSize);
+        }
+
+        return getPage(updatePayingMovies(tmdbPage), pageNumber, pageSize);
+    }
+
+    public List<MovieDetailDto> getTrendingMovie(String timeWindow, int pageNumber, int pageSize){
+
+        List<TrendingMovie> trendingMovies = trendingMovieRepository.findAllByOption("trending");
+        if(trendingMovies.size() > pageSize){
+            List<MovieDetailDto> result = new ArrayList<>();
+            for(TrendingMovie movie : trendingMovies){
+                result.add(new MovieDetailDto(movie));
+            }
+            return getPage(result, pageNumber, pageSize);
+        }
+        return getPage(updateTrendingMovies(), pageNumber, pageSize);
+    }
+
+    public List<MovieDetailDto> updateTrendingMovies(){
+
+        MovieListDto movies = tmdbClient.searchTrendingMovie("day");
+        List<MovieNowPlayingDto> dtos = movies.getResults();
+        List<MovieDetailDto> result = new ArrayList<>();
+        for(MovieNowPlayingDto dto : dtos){
+            result.add(tmdbIdToMovieDetailDto(dto.getId(),"trending"));
+
+        }
+        return result;
+    }
+
+    public List<MovieDetailDto> updatePayingMovies(int tmdbPage){
+
         MovieListDto movies = tmdbClient.searchPlayingMovie(tmdbPage);
         List<MovieNowPlayingDto> dtos = movies.getResults();
         List<MovieDetailDto> result = new ArrayList<>();
         for(MovieNowPlayingDto dto : dtos){
-            result.add(tmdbIdToMovieDetailDto(dto.getId()));
+            result.add(tmdbIdToMovieDetailDto(dto.getId(),"nowPlaying"));
+
         }
-        getPage(result, pageNumber, pageSize);
-        return getPage(result, pageNumber, pageSize);
+        return result;
     }
 
-    public List<MovieDetailDto> getTrendingMovie(String timeWindow, int pageNumber, int pageSize){
-        MovieListDto movies = tmdbClient.searchTrendingMovie(timeWindow);
-        List<MovieNowPlayingDto> dtos = movies.getResults();
-        List<MovieDetailDto> result = new ArrayList<>();
-        for(MovieNowPlayingDto dto : dtos){
-            result.add(tmdbIdToMovieDetailDto(dto.getId()));
-        }
-
-        return getPage(result, pageNumber, pageSize);
-    }
-
-    public MovieDetailDto tmdbIdToMovieDetailDto(Long tmdbId){
+    public MovieDetailDto tmdbIdToMovieDetailDto(Long tmdbId,String option){
         MovieDto movieDto = tmdbClient.getMovieDetails(tmdbId);
         MovieDetailDto result = MovieDetailDto.builder()
+                .id(tmdbId)
                 .posterPath("https://image.tmdb.org/t/p/w500/"+ movieDto.getPosterPath())
                 .originalTitle(movieDto.getOriginalTitle())
                 .title(movieDto.getTitle())
@@ -289,7 +321,26 @@ public class MovieService {
                 .tagline(movieDto.getTagline())
                 .overview(movieDto.getOverview())
                 .build();
+
+        saveTrendingMoviesAsync(result,option);
         return result;
+    }
+
+
+    @Async
+    public void saveTrendingMoviesAsync(MovieDetailDto dto,String option) {
+        TrendingMovie movie = trendingMovieRepository.findById(dto.getId()).orElse(null);
+        if (movie == null) {
+            movie = new TrendingMovie(dto,option);
+            System.out.println("Saving trending movie genre: " + movie.getGenreString());
+            trendingMovieRepository.save(movie);
+        }//movieType이 option을 포함하지 않으면
+        else if(!(movie.getMovieType().contains(option))){
+            movie.setMovieType(movie.getMovieType() + "|" + option);
+            movie.setUpdateDate(LocalDateTime.now());
+            trendingMovieRepository.save(movie);
+
+        }
     }
 
     public List<MoviePosterDto> getLikedMovies(){

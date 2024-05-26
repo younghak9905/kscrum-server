@@ -5,6 +5,7 @@ import com.example.demo.domain.entity.Movie;
 import com.example.demo.service.MovieMarkedService;
 import com.example.demo.service.MovieService;
 import com.example.demo.service.RecommandService;
+import com.example.demo.task.MovieUpdateTask;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,8 @@ public class MovieController {
     private final RecommandService recommandService;
 
     private final MovieMarkedService movieMarkedService;
+
+    private final MovieUpdateTask movieUpdateTask;
 
 
 
@@ -159,6 +162,13 @@ public class MovieController {
     public ResponseEntity<List<MovieDetailDto>> trendingDayMovie(@RequestParam(value = "page", defaultValue = "0") int page,
                                                                  @RequestParam(value = "size", defaultValue = "8") int size){
         return ResponseEntity.ok(movieService.getTrendingMovie("day",page, size));
+    }
+
+    @Operation(summary = "explore 영화 업데이트")
+    @PostMapping("/explore/update")
+    public ResponseEntity<Void> updateExploreMovies() {
+        movieUpdateTask.updateMovies();
+        return ResponseEntity.ok().build();
     }
 
 

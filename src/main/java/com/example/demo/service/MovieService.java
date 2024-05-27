@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.domain.dto.*;
 import com.example.demo.domain.entity.*;
+import com.example.demo.exception.InvalidKeywordException;
 import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -224,9 +225,16 @@ public class MovieService {
             else
                 pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, filterType));
             moviesPage = movieRepository.findAllByTitleContaining(keyword, pageable);
+            if(moviesPage.isEmpty()){
+
+                List<MoviePosterDto> moviePosterDto = tmdbClient.searchMoviePosterList(keyword);
+                return moviePosterDto;
+            }
         }
+
         return movieToMoviePosterDto(moviesPage.getContent());
     }
+
 
     public MovieDetailDto getMovieDetails(Long movieId) {
         Movie movie = movieRepository.findByMovieId(movieId).orElse(null);
@@ -357,6 +365,19 @@ public class MovieService {
             return new MoviePosterDto(movie, getPosterUrl(movie));
         }
         return null;
+    }
+
+
+    public void validateKeyword(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            throw new InvalidKeywordException("값을 입력해주세요");
+        }
+
+        // 추가적인 유효성 검사 (예: 특수문자 검사)
+        // keyword 유효성 검사
+        if (!keyword.matches("^[a-zA-Z0-9가-힣 ()가-힣,]*$")) {
+            throw new InvalidKeywordException("입력값이 올바르지 않습니다.");
+        }
     }
 
 }

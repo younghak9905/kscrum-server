@@ -71,10 +71,18 @@ public class DBupdateController {
         return ResponseEntity.ok().build();
     }
 
-@Operation(summary = "영화 아이디로 영화 찾기")
+    @Operation(summary = "영화 아이디로 영화 찾기")
     @GetMapping("/movieId")
     public ResponseEntity<String> getTitle(@RequestParam Long movieId) {
         return ResponseEntity.ok(dbupdateService.getTitleByMovieId(movieId));
+    }
+
+    @Operation(summary = "영화 제목 업데이트-한글로")
+    @PostMapping("/update/title/ko")
+    public ResponseEntity<Void> updateTitleKo(  @RequestParam(value = "page", defaultValue = "0") int page,
+                                                @RequestParam(value = "size", defaultValue = "1") int size) {
+        dbupdateService. updateMovieTitle(page,size);
+        return ResponseEntity.ok().build();
     }
 
 }

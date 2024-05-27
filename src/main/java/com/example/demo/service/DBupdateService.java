@@ -211,4 +211,37 @@ public class DBupdateService {
         movieRepository.saveAll(movies);
 
     }
+
+    @Async
+    public CompletableFuture<Void> updateMovieTitle(int page, int size) {
+        int startIndex = page * 100;
+        for (int i = 0; i < size; i++) {
+            // 페이지 요청 생성: 각 반복에서 페이지 크기는 100으로 고정
+            Pageable pageable = PageRequest.of((startIndex / 100) + i, 100);
+            Page<Movie> moviePage = movieRepository.findAll(pageable);
+
+            // 각 영화에 대한 처리 로직을 수행합니다.
+            updateKoreanTitle(moviePage); // 변경된 메서드 호출
+
+            // 진행 상황 로깅
+            System.out.println("Page: " + (page + 1) + ", Offset: " + pageable.getOffset() + ", Movies: " + moviePage.getContent().size());
+        }
+
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Transactional
+    public void updateKoreanTitle(Page<Movie> moviePage) {
+        moviePage.forEach(movie -> {
+            Long tmdbId = movieService.getTmdbId(movie);
+            if (tmdbId != null) {
+                String korTitle = tmdbClient.getMovieDetails(tmdbId).getTitle();
+                movie.setKorTitle(korTitle);
+                movieRepository.save(movie);
+            }
+        });
+
+    }
+
+
 }

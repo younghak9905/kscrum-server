@@ -22,4 +22,6 @@ import org.hibernate.annotations.OnDeleteAction;
     @JoinColumn(name = "movie_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Movie movie;
+
+    private boolean offset;
 }

@@ -37,4 +37,16 @@ public class MovieLikeController {
         movieLikeService.removeLikedMovie(movieId);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "offset이 false인 영화가 2개 이상인지 확인")
+    @GetMapping("/check-offset")
+    public ResponseEntity<Boolean> checkOffset() {
+        return ResponseEntity.ok(movieLikeService.checkOffset());
+    }
+
+    @Operation(summary = "check-offset이 true일때, tmdbId 리스트 가져오기")
+    @GetMapping("/tmdbId-list")
+    public ResponseEntity<List<Long>> tmdbIdList() {
+        return ResponseEntity.ok(movieLikeService.getTmdbIdList());
+    }
 }

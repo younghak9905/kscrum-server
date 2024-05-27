@@ -111,7 +111,9 @@ public class MovieController {
                                                             @RequestParam(value = "filterType", defaultValue = "year") String filterType,
                                                             @RequestParam(value = "ordering", defaultValue = "desc") String ordering,
                                                             @RequestParam(value = "keyword") String keyword) {
-        return ResponseEntity.ok(movieService.search(page, size, type, keyword, filterType, ordering));
+
+    movieService.validateKeyword(keyword);
+    return ResponseEntity.ok(movieService.search(page, size, type, keyword, filterType, ordering));
     }
 
 

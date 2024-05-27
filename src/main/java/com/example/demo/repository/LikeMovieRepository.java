@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface LikeMovieRepository extends JpaRepository<LikeMovie, Long> {
 
@@ -18,4 +20,10 @@ public interface LikeMovieRepository extends JpaRepository<LikeMovie, Long> {
 
 
     boolean existsByMovie(Movie movie);
+
+    @Query("SELECT COUNT(lm) > 2 FROM LikeMovie lm WHERE lm.offset = false")
+    boolean hasMoreThanTwoOffsetFalse();
+
+    @Query("SELECT lm.movie FROM LikeMovie lm WHERE lm.offset = false")
+    List<Movie> findMovieIdsByOffsetFalse();
 }

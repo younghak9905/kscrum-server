@@ -2,9 +2,11 @@ package com.example.demo.service;
 
 import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.entity.LikeMovie;
+import com.example.demo.domain.entity.Links;
 import com.example.demo.domain.entity.MarkedMovie;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.repository.LikeMovieRepository;
+import com.example.demo.repository.LinksRepository;
 import com.example.demo.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +22,7 @@ public class MovieLikeService {
 
     private final LikeMovieRepository likeMovieRepository;
 
+    private final LinksRepository linksRepository;
 
     public void addLikedMovie(Long movieId) {
         Optional<Movie> findMovie = movieRepository.findByMovieId(movieId);
@@ -62,8 +65,31 @@ public class MovieLikeService {
         }
     }
 
+    public boolean checkOffset() {
+        return likeMovieRepository.hasMoreThanTwoOffsetFalse();
+    }
 
+    public List<Long> getTmdbIdList() {
+        List<Long> tmdbIdList = new ArrayList<>();
+        if(checkOffset()){
+            List<Movie> movieList = likeMovieRepository.findMovieIdsByOffsetFalse();
+            for (Movie movie : movieList) {
+                tmdbIdList.add(getTmdbId(movie));
+            }
+        } else{
+            throw new IllegalArgumentException("The conditions were not met.");
+        }
+        return tmdbIdList;
+    }
 
-
+    public Long getTmdbId(Movie movie) {
+        long startTime = System.currentTimeMillis();
+        Optional<Links> link = linksRepository.findByMovieId(movie);
+        if (link.isPresent()) {
+            System.out.println("findTmdbId: " + (System.currentTimeMillis() - startTime) + " ms");
+            return link.get().getTmdbId();
+        }
+        return null;
+    }
 
 }

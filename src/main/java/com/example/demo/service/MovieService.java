@@ -224,12 +224,15 @@ public class MovieService {
                 pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, filterType));
             else
                 pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, filterType));
-            moviesPage = movieRepository.findAllByTitleContaining(keyword, pageable);
-            if(moviesPage.isEmpty()){
 
-                List<MoviePosterDto> moviePosterDto = tmdbClient.searchMoviePosterList(keyword);
-                return moviePosterDto;
+            //한글이 포함되어있다면
+            if(keyword.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*")){
+                moviesPage = movieRepository.findAllByKorTitleContaining(keyword, pageable);
             }
+            else {
+                moviesPage = movieRepository.findAllByTitleContaining(keyword, pageable);
+            }
+
         }
 
         return movieToMoviePosterDto(moviesPage.getContent());

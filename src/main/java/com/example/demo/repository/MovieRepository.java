@@ -4,6 +4,7 @@ import com.example.demo.domain.entity.Genre;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.domain.entity.MovieGenre;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -62,4 +63,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     @Query("SELECT m FROM Movie m WHERE m.priority IS NOT NULL or m.updateDate IS NOT NULL")
     List<Movie> findPriorityIsNotNull();
+
+    Page<Movie> findAllByKorTitleContaining(String keyword, Pageable pageable);
 }

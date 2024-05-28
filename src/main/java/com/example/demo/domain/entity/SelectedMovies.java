@@ -9,7 +9,9 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Getter
 @Setter
-@Table(name = "selected_movies",indexes = { @Index(name = "idx_movies_id", columnList = "id"),
+@Table(name = "selected_movies",indexes = {
+         @Index(name = "idx_movies_id", columnList = "id"),
+         @Index(name = "idx_movies_movie_id", columnList = "movie_id"),
 
 
        })

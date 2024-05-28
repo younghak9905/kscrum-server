@@ -24,4 +24,6 @@ public interface SelectedMoviesRepository extends JpaRepository<SelectedMovies, 
     List<Long> findDuplicateIds();
 
     List<SelectedMovies> findAllById(Long id);
+
+    boolean existsByMovie(Movie movie);
 }

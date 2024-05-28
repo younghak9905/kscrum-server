@@ -264,16 +264,20 @@ public class DBupdateService {
     @Transactional
     public void matchTmdbId(Page<SelectedMovies> moviePage) {
         moviePage.forEach(movie -> {
-            String korTitle = tmdbClient.getMovieDetails(movie.getId()).getTitle();
-            if (korTitle != null) {
-                movie.setKorTitle(korTitle);
-            }
-           Movie movieId = movieService.getMovieId(movie.getId());
-            if (movieId != null) {
-                movie.setMovie(movieId);
+            if(movie.getMovie()!=null)
+            {
+                String korTitle = tmdbClient.getMovieDetails(movie.getId()).getTitle();
+                if (korTitle != null) {
+                    movie.setKorTitle(korTitle);
+                }
+                Movie movieId = movieService.getMovieId(movie.getId());
+                if (movieId != null) {
+                    movie.setMovie(movieId);
 
+                }
+                selectedMoviesRepository.save(movie);
             }
-            selectedMoviesRepository.save(movie);
+
         });
 
     }

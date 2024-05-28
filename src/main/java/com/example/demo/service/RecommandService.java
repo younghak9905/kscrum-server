@@ -44,6 +44,10 @@ public class RecommandService {
 
     public void choiceMovie(MovieChoiceRequestDto dto) {
         List<Long> movieIds = dto.getMovieIds();
+        if(movieIds.size()==0){
+            return;
+        }
+
         System.out.println("Movie IDs: " + movieIds);
         //
         List<String> movieTitles = new ArrayList<>();

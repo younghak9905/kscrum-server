@@ -33,7 +33,7 @@ public class MoviePosterDto {
 
     public MoviePosterDto(Movie movie, String posterPath) {
         this.movieId = movie.getMovieId();
-        this.title = movie.getTitle();
+        this.title = movie.getKorTitle();
         this.posterPath = posterPath;
         this.url = "https://image.tmdb.org/t/p/w500"+posterPath;
 
@@ -49,7 +49,7 @@ public class MoviePosterDto {
 
     public MoviePosterDto(Movie movie, String posterPath,boolean isMarked,boolean isLiked) {
         this.movieId = movie.getMovieId();
-        this.title = movie.getTitle();
+        this.title = movie.getKorTitle();
         this.posterPath = posterPath;
         this.url = "https://image.tmdb.org/t/p/w500"+posterPath;
         this.isMarked = isMarked;

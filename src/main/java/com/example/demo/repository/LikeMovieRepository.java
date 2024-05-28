@@ -24,8 +24,8 @@ public interface LikeMovieRepository extends JpaRepository<LikeMovie, Long> {
     @Query("SELECT COUNT(lm) > 2 FROM LikeMovie lm WHERE lm.offset = false")
     boolean hasMoreThanTwoOffsetFalse();
 
-    @Query("SELECT * FROM LikeMovie lm WHERE lm.offset = false")
-    List<LikeMovie> findMovieIdsByOffsetFalse();
+@Query("SELECT lm FROM LikeMovie lm WHERE lm.offset = false")
+    List<LikeMovie> findAllByOffsetFalse();
 
 
 }

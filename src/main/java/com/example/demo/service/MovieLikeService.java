@@ -81,7 +81,7 @@ public class MovieLikeService {
     public List<Long> getTmdbIdList() {
         List<Long> tmdbIdList = new ArrayList<>();
         if(checkOffset()){
-            List<LikeMovie> movieList = likeMovieRepository.findMovieIdsByOffsetFalse();
+            List<LikeMovie> movieList = likeMovieRepository.findAllByOffsetFalse();
             for (LikeMovie movie : movieList) {
                 if(selectedMoviesRepository.existsByMovie(movie.getMovie())){
                     movie.setOffset(false);

@@ -74,6 +74,26 @@ public class TmdbClient {
     }
 
 
+    public MovieDto getMovieDetailsEng(Long movieId) {
+//        String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/movie/" + movieId)
+//                .queryParam("api_key", apiKey)
+//                .toUriString();
+//        return restTemplate.getForObject(url, MovieDto.class);
+        try {
+            String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/movie/" + movieId)
+                    .queryParam("api_key", apiKey)
+                    .toUriString();
+            return restTemplate.getForObject(url, MovieDto.class);
+        } catch (HttpClientErrorException.NotFound ex) {
+            // 영화 ID에 해당하는 영화가 존재하지 않는 경우
+            // 혹은 TMDB API에서 해당 리소스를 찾을 수 없는 경우
+            // 예외를 처리하고 적절한 에러 메시지를 반환
+            //throw new NotFoundException("Requested movie does not exist.");
+            return null;
+        }
+    }
+
+
     public MoviePosterDto searchMoviePoster(String query) {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/search/movie")
                 .queryParam("api_key", apiKey)

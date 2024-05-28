@@ -46,6 +46,8 @@ public class MovieService {
 
     private final TrendingMovieRepository trendingMovieRepository;
 
+    private final SelectedMoviesRepository selectedMoviesRepository;
+
 
     @Value("${ML.api.url}")
     String url;
@@ -78,14 +80,19 @@ public class MovieService {
         List<MoviePosterDto> moviePosterDtos = new ArrayList<>();
 //        List<Genre> movieGenres = findAllGenres();
 
-            System.out.println("Genre: " + genre);
+        System.out.println("Genre: " + genre);
 
-            List<Movie> randomMovies = movieRepository.findRandomMoviesByRomance(genre);
-            moviePosterDtos.addAll(movieToMoviePosterDto(randomMovies));
+        List<SelectedMovies> randomMovies = selectedMoviesRepository.findRandomMoviesByRomance(genre);
+        List<Movie> movies = new ArrayList<>();
+        for (SelectedMovies selectedMovies : randomMovies) {
+            movies.add(selectedMovies.getMovie());
+        }
+        moviePosterDtos.addAll(movieToMoviePosterDto(movies));
         MovieGenreDto movieGenreDto = new MovieGenreDto(genre, moviePosterDtos);
 
         return movieGenreDto;
     }
+
 
     public List<Genre> findAllGenres() {
         List<MovieGenre> movieGenres = movieGenreRepository.findAll();
@@ -182,6 +189,16 @@ public class MovieService {
         if (link.isPresent()) {
             System.out.println("findTmdbId: " + (System.currentTimeMillis() - startTime) + " ms");
             return link.get().getTmdbId();
+        }
+        return null;
+    }
+
+    public Movie getMovieId(Long tmdbId) {
+
+        Optional<Links> link = Optional.ofNullable(linksRepository.findByTmdbId(tmdbId));
+        if (link.isPresent()) {
+
+            return link.get().getMovieId();
         }
         return null;
     }

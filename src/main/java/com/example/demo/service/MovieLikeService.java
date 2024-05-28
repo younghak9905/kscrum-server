@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.domain.dto.MovieChoiceRequestDto;
 import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.entity.LikeMovie;
 import com.example.demo.domain.entity.Links;
@@ -10,10 +11,13 @@ import com.example.demo.repository.LinksRepository;
 import com.example.demo.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+
 @Service
 @RequiredArgsConstructor
 public class MovieLikeService {
@@ -23,6 +27,8 @@ public class MovieLikeService {
     private final LikeMovieRepository likeMovieRepository;
 
     private final LinksRepository linksRepository;
+
+    private final RecommandService recommandService;
 
     public void addLikedMovie(Long movieId) {
         Optional<Movie> findMovie = movieRepository.findByMovieId(movieId);
@@ -77,9 +83,21 @@ public class MovieLikeService {
                 tmdbIdList.add(getTmdbId(movie));
             }
         } else{
-            throw new IllegalArgumentException("The conditions were not met.");
+            throw new IllegalArgumentException("Movie with offset false not found.");
         }
         return tmdbIdList;
+    }
+
+
+    @Async
+    public CompletableFuture<Void> updateMovieRecommand() {
+        List<Long> tmdbIdList = getTmdbIdList();
+        if(tmdbIdList.isEmpty()){
+            return CompletableFuture.completedFuture(null);
+        }
+        MovieChoiceRequestDto dto = new MovieChoiceRequestDto(tmdbIdList);
+        recommandService.choiceMovie(dto);
+        return CompletableFuture.completedFuture(null);
     }
 
     public Long getTmdbId(Movie movie) {

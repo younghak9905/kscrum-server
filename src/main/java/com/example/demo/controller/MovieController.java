@@ -43,7 +43,7 @@ public class MovieController {
         recommandService.choiceMovie(dto);
         return ResponseEntity.ok().build();
     }
-@Operation(summary = "취향 영화 가져오기-장르별로 검색오는 API로 대체됨")
+    @Operation(summary = "취향 영화 가져오기-장르별로 검색오는 API로 대체됨")
     @GetMapping("/choice")
     public ResponseEntity<List<MoviePosterDto>> choiceMovie() {
         return ResponseEntity.ok(movieService.choiceRandomMovies());

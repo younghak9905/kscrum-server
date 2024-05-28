@@ -85,4 +85,13 @@ public class DBupdateController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "tmdbId와 movieId 매칭")
+    @PostMapping("/match")
+    public ResponseEntity<Void> matchTmdbId(@RequestParam(value = "page", defaultValue = "0") int page,
+                                            @RequestParam(value = "size", defaultValue = "1") int size) {
+
+        dbupdateService.match(page,size);
+        return ResponseEntity.ok().build();
+    }
+
 }

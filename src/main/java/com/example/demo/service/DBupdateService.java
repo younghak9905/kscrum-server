@@ -1,13 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.domain.entity.Genre;
-import com.example.demo.domain.entity.Movie;
-import com.example.demo.domain.entity.MovieGenre;
-import com.example.demo.domain.entity.TestUser;
-import com.example.demo.repository.GenreRepository;
-import com.example.demo.repository.MovieGenreRepository;
-import com.example.demo.repository.MovieRepository;
-import com.example.demo.repository.TestUserRepository;
+import com.example.demo.domain.entity.*;
+import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +33,8 @@ public class DBupdateService {
     private final MovieGenreRepository movieGenreRepository;
 
     private final TmdbClient tmdbClient;
+
+    private final SelectedMoviesRepository selectedMoviesRepository;
 
 
     private final MovieService movieService;
@@ -244,4 +240,41 @@ public class DBupdateService {
     }
 
 
+    @Async
+    public CompletableFuture<Void> match(int page, int size) {
+        int startIndex = page * 100;
+        for (int i = 0; i < size; i++) {
+            // 페이지 요청 생성: 각 반복에서 페이지 크기는 100으로 고정
+            Pageable pageable = PageRequest.of((startIndex / 100) + i, 100);
+            Page<SelectedMovies> moviePage = selectedMoviesRepository.findAll(pageable);
+
+            matchTmdbId(moviePage);
+
+            // 각 영화에 대한 처리 로직을 수행합니다.
+
+
+            // 진행 상황 로깅
+            System.out.println("Page: " + (page + 1) + ", Offset: " + pageable.getOffset() + ", Movies: " + moviePage.getContent().size());
+        }
+
+        return CompletableFuture.completedFuture(null);
+
+    }
+
+    @Transactional
+    public void matchTmdbId(Page<SelectedMovies> moviePage) {
+        moviePage.forEach(movie -> {
+            String korTitle = tmdbClient.getMovieDetails(movie.getId()).getTitle();
+            if (korTitle != null) {
+                movie.setKorTitle(korTitle);
+            }
+           Movie movieId = movieService.getMovieId(movie.getId());
+            if (movieId != null) {
+                movie.setMovie(movieId);
+
+            }
+            selectedMoviesRepository.save(movie);
+        });
+
+    }
 }

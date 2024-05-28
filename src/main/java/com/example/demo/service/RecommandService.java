@@ -1,12 +1,16 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.dto.MovieChoiceRequestDto;
+import com.example.demo.domain.dto.MovieGenreDto;
+import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.dto.MovieRecommendDto;
 import com.example.demo.domain.entity.Links;
 import com.example.demo.domain.entity.Movie;
+import com.example.demo.domain.entity.SelectedMovies;
 import com.example.demo.repository.LinksRepository;
 import com.example.demo.repository.MovieGenreRepository;
 import com.example.demo.repository.MovieRepository;
+import com.example.demo.repository.SelectedMoviesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -36,6 +40,10 @@ public class RecommandService {
     private final WebClient webClient;
 
     private final LinksRepository linksRepository;
+
+    private final SelectedMoviesRepository selectedMoviesRepository;
+
+
 
     @Value("${ML.api.url}")
     String url;
@@ -138,6 +146,8 @@ public class RecommandService {
         movieRepository.saveAll(movies);
 
     }
+
+
 
 
 

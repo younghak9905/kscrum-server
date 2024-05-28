@@ -9,14 +9,16 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Getter
 @Setter
-@Table(name = "selected_movies",indexes = { @Index(name = "idx_movies_id", columnList = "movieId"),
+@Table(name = "selected_movies",indexes = { @Index(name = "idx_movies_id", columnList = "id"),
+
+
        })
 public class SelectedMovies {
     @Id
     private Long id;
 
     private String title;
-
+    @Column(columnDefinition = "TEXT")
     private String genres;
 
     @ManyToOne(fetch = FetchType.LAZY)

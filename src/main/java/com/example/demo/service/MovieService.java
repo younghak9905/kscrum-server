@@ -85,7 +85,8 @@ public class MovieService {
         List<SelectedMovies> randomMovies = selectedMoviesRepository.findRandomMoviesByRomance(genre);
         List<Movie> movies = new ArrayList<>();
         for (SelectedMovies selectedMovies : randomMovies) {
-            movies.add(selectedMovies.getMovie());
+            if(selectedMovies.getMovie() != null)
+                movies.add(selectedMovies.getMovie());
         }
         moviePosterDtos.addAll(movieToMoviePosterDto(movies));
         MovieGenreDto movieGenreDto = new MovieGenreDto(genre, moviePosterDtos);

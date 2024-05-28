@@ -13,9 +13,15 @@ import java.util.List;
 @Repository
 public interface SelectedMoviesRepository extends JpaRepository<SelectedMovies, Long> {
 
-    @Query(value = "SELECT * FROM (SELECT * FROM movies WHERE genres LIKE %:genre% ORDER BY RAND() LIMIT 4) AS subquery", nativeQuery = true)
+    @Query(value = "SELECT * FROM (SELECT * FROM selected_movies WHERE genres LIKE %:genre% ORDER BY RAND() LIMIT 4) AS subquery", nativeQuery = true)
     List<SelectedMovies> findRandomMoviesByRomance(String genre);
 
 
+
     Page<SelectedMovies> findAll(Pageable pageable);
+
+    @Query("SELECT sm.id FROM SelectedMovies sm GROUP BY sm.id HAVING COUNT(sm.id) > 1")
+    List<Long> findDuplicateIds();
+
+    List<SelectedMovies> findAllById(Long id);
 }

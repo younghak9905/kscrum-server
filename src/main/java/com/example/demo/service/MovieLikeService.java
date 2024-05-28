@@ -9,6 +9,7 @@ import com.example.demo.domain.entity.Movie;
 import com.example.demo.repository.LikeMovieRepository;
 import com.example.demo.repository.LinksRepository;
 import com.example.demo.repository.MovieRepository;
+import com.example.demo.repository.SelectedMoviesRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.scheduling.annotation.Async;
@@ -29,6 +30,8 @@ public class MovieLikeService {
     private final LinksRepository linksRepository;
 
     private final RecommandService recommandService;
+
+    private final SelectedMoviesRepository selectedMoviesRepository;
 
     public void addLikedMovie(Long movieId) {
         Optional<Movie> findMovie = movieRepository.findByMovieId(movieId);
@@ -78,9 +81,16 @@ public class MovieLikeService {
     public List<Long> getTmdbIdList() {
         List<Long> tmdbIdList = new ArrayList<>();
         if(checkOffset()){
-            List<Movie> movieList = likeMovieRepository.findMovieIdsByOffsetFalse();
-            for (Movie movie : movieList) {
-                tmdbIdList.add(getTmdbId(movie));
+            List<LikeMovie> movieList = likeMovieRepository.findMovieIdsByOffsetFalse();
+            for (LikeMovie movie : movieList) {
+                if(selectedMoviesRepository.existsByMovie(movie.getMovie())){
+                    movie.setOffset(false);
+                    tmdbIdList.add(getTmdbId(movie.getMovie()));
+                }
+                else
+                {
+                  movie.setOffset(false);
+                }
             }
         } else{
             throw new IllegalArgumentException("Movie with offset false not found.");

@@ -3,6 +3,7 @@ package com.example.demo.repository;
 import com.example.demo.domain.entity.Genre;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.domain.entity.MovieGenre;
+import com.example.demo.service.MovieService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -65,4 +66,8 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findPriorityIsNotNull();
 
     Page<Movie> findAllByKorTitleContaining(String keyword, Pageable pageable);
+
+    //Movie의 가장 마지막 번호
+    @Query("SELECT m FROM Movie m WHERE m.movieId = (SELECT MAX(m.movieId) FROM Movie m)")
+    Movie findFirstByOrderByMovieIdDesc();
 }

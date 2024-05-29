@@ -265,7 +265,7 @@ public class DBupdateService {
     @Transactional
     public void matchTmdbId(Page<SelectedMovies> moviePage) {
         moviePage.forEach(movie -> {
-
+            if(  movie.getMovie()==null) {
 
                 Movie movieId = movieService.getMovieId(movie.getId());
                 if (movieId != null) {
@@ -275,18 +275,16 @@ public class DBupdateService {
                         movie.setKorTitle(korTitle);
                     }
                     selectedMoviesRepository.save(movie);
-                }
-                else {
+                } else {
 
                     //movie 테이블에 가장 마지막 번호
                     MovieDto movieDto = tmdbClient.getMovieDetails(movie.getId());
-                    if(movieDto!=null)
-                    {    Long id=movieRepository.findFirstByOrderByMovieIdDesc().getMovieId()+movie.getId()+99999;
-                        Movie newMovie = new Movie(movieDto,id);
+                    if (movieDto != null) {
+                        Long id = movieRepository.findFirstByOrderByMovieIdDesc().getMovieId() + movie.getId() + 99999;
+                        Movie newMovie = new Movie(movieDto, id);
                         String genres = tmdbClient.getMovieDetailsEng(movie.getId()).getGenres().toString();
                         newMovie.setGenres(genres);
-                        if(movieRepository.findByMovieId(id).isEmpty())
-                        {
+                        if (movieRepository.findByMovieId(id).isEmpty()) {
                             movieRepository.save(newMovie);
                             movie.setKorTitle(movieDto.getTitle());
                             selectedMoviesRepository.save(movie);
@@ -294,11 +292,10 @@ public class DBupdateService {
                     }
 
 
-
                 }
 
 
-
+            }
 
         });
 

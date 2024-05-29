@@ -86,16 +86,19 @@ public class MovieLikeService {
             for (LikeMovie movie : movieList) {
                 if(selectedMoviesRepository.existsByMovie(movie.getMovie())){
                     movie.setOffset(true);
+                    likeMovieRepository.save(movie);
                     tmdbIdList.add(movie.getMovie().getMovieId());
                 }
                 else
                 {
                   movie.setOffset(true);
+                    likeMovieRepository.save(movie);
                 }
             }
         } else{
             throw new IllegalArgumentException("Movie with offset false not found.");
         }
+
         return tmdbIdList;
     }
 

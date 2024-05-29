@@ -47,7 +47,7 @@ public class MoviePosterDto {
 
     }
 
-    public MoviePosterDto(Movie movie, String posterPath,boolean isMarked,boolean isLiked) {
+    public MoviePosterDto(Movie movie, String posterPath,boolean isLiked,boolean isMarked) {
         this.movieId = movie.getMovieId();
         this.title = movie.getKorTitle();
         this.posterPath = posterPath;

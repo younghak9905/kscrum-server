@@ -163,7 +163,9 @@ public class MovieService {
         long startTime = System.currentTimeMillis();
         String posterUrl = getPosterUrl(movie);
         System.out.println("Create MoviePosterDto time: " + (System.currentTimeMillis() - startTime) + " ms");
-        return new MoviePosterDto(movie, posterUrl);
+        boolean isLiked = movieLikeService.isLikedMovie(movie);
+        boolean isMarked = markedService. isMarkedMovie(movie);
+        return new MoviePosterDto(movie, posterUrl,isLiked,isMarked);
     }
 
     private String fetchAndSavePosterUrl(Movie movie) {

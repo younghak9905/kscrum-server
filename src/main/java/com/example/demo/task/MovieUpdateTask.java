@@ -21,7 +21,7 @@ public class MovieUpdateTask {
         movieService.updatePayingMovies(1);
     }
     //5분간격으로 실행
-   // @Scheduled(fixedDelay = 300000)
+    @Scheduled(fixedDelay = 300000)
     public void likeRecommandMovie() {
         movieLikeService.updateMovieRecommand();
     }

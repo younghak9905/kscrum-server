@@ -9,17 +9,25 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Getter
 @Setter
-@Table(name = "marked_movie",indexes = {
-        @Index(name = "idx_movie_id", columnList = "movie_id")
-})
-public class MarkedMovie {
+@Table(name = "selected_movies",indexes = {
+         @Index(name = "idx_movies_id", columnList = "id"),
+         @Index(name = "idx_movies_movie_id", columnList = "movie_id"),
+
+
+       })
+public class SelectedMovies {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String title;
+    @Column(columnDefinition = "TEXT")
+    private String genres;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Movie movie;
+
+    private String korTitle;
 
 }

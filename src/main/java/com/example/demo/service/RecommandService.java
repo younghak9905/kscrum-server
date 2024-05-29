@@ -1,11 +1,16 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.dto.MovieChoiceRequestDto;
+import com.example.demo.domain.dto.MovieGenreDto;
+import com.example.demo.domain.dto.MoviePosterDto;
 import com.example.demo.domain.dto.MovieRecommendDto;
+import com.example.demo.domain.entity.Links;
 import com.example.demo.domain.entity.Movie;
+import com.example.demo.domain.entity.SelectedMovies;
 import com.example.demo.repository.LinksRepository;
 import com.example.demo.repository.MovieGenreRepository;
 import com.example.demo.repository.MovieRepository;
+import com.example.demo.repository.SelectedMoviesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -18,6 +23,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -33,6 +39,12 @@ public class RecommandService {
 
     private final WebClient webClient;
 
+    private final LinksRepository linksRepository;
+
+    private final SelectedMoviesRepository selectedMoviesRepository;
+
+
+
     @Value("${ML.api.url}")
     String url;
 
@@ -40,13 +52,37 @@ public class RecommandService {
 
     public void choiceMovie(MovieChoiceRequestDto dto) {
         List<Long> movieIds = dto.getMovieIds();
-        List<Movie> movies = movieRepository.findByMovieIdIn(movieIds);
+        if(movieIds.size()==0){
+            return;
+        }
+
+        System.out.println("Movie IDs: " + movieIds);
+        //
         List<String> movieTitles = new ArrayList<>();
-        for (Movie movie : movies) {
-            String titleWithoutYear = movie.getMovieId().toString();
+        for (Movie movieId : movieRepository.findByMovieIdIn(movieIds)) {
+            Long tmdbId=linksRepository.findByMovieId(movieId).get().getTmdbId();
+            String titleWithoutYear = tmdbId.toString();
             movieTitles.add(titleWithoutYear);
         }
 
+
+        System.out.println(movieTitles);
+        getRecommendationsAsync(movieTitles).thenAccept(recommendations -> {
+            System.out.println("Recommendations: " + recommendations);
+            List<Long> movieTitlesToSave = recommendations.stream()
+                    .map(MovieRecommendDto::getMovieId)
+                    .collect(Collectors.toList());
+            // 비동기적으로 받은 추천 영화 처리
+            updateMoviePriorities(movieTitlesToSave);
+            System.out.println("Movie priorities updated");
+        });
+    }
+
+
+    public void choiceMovie(Movie likeMovie) {
+
+        List<String> movieTitles = new ArrayList<>();
+        movieTitles.add(likeMovie.getMovieId().toString());
         getRecommendationsAsync(movieTitles).thenAccept(recommendations -> {
             System.out.println("Recommendations: " + recommendations);
             List<Long> movieTitlesToSave = recommendations.stream()
@@ -60,13 +96,14 @@ public class RecommandService {
 
 
 
+
     @Async
     public CompletableFuture<List<MovieRecommendDto>> getRecommendationsAsync(List<String> movieTitles) {
 
-        String movieTitlesParam = String.join("", movieTitles);
+        String movieTitlesParam = String.join("|", movieTitles);
         // 쿼리 파라미터로 영화 제목 목록을 추가
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl("http://test")
-                .queryParam("movie_titles", movieTitlesParam); // 리스트를 파이프로 구분된 문자열로 변환
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
+                .queryParam("movie_id", movieTitlesParam); // 리스트를 파이프로 구분된 문자열로 변환
         System.out.println("URL: " + uriBuilder.toUriString());
 
         return webClient.get() // GET 메서드 사용
@@ -84,19 +121,21 @@ public class RecommandService {
 
     @Async
     public void updateMoviePriorities(List<Long> recommendations) {
-        System.out.println(recommendations);
+        System.out.println("recomandations: "+recommendations);
         List<Movie> movies = new ArrayList<>();
-        for (Long movieId : recommendations) {
-            Movie movie = movieRepository.findByMovieId(movieId).stream()
-                    .filter(m -> !recommendations.contains(m.getMovieId())) // 추천 영화 목록에 없는 영화만 선택
-                    .findFirst()
-                    .orElse(null);
-            if (movie != null) {
-                movies.add(movie);
+        for(Long tmdbId: recommendations){
+            Links link=linksRepository.findByTmdbId(tmdbId);
+            if(link==null){
+                continue;
             }
+
+          movies.add(link.getMovieId());
         }
 
+
+
         movies.forEach(movie -> {
+            System.out.println("Movie: " + movie.getTitle()+ ", Year: " + movie.getYear()+"id: "+movie.getMovieId());
             int movieYear = Integer.parseInt(movie.getYear());
             if (movieYear >= 2000) {
                 movie.setPriority(movie.getPriority() == null ? 1 : movie.getPriority() + 1);
@@ -107,6 +146,8 @@ public class RecommandService {
         movieRepository.saveAll(movies);
 
     }
+
+
 
 
 

@@ -10,4 +10,11 @@ import java.util.List;
 public class MovieChoiceRequestDto {
 
     List<Long> movieIds;
+
+    public MovieChoiceRequestDto(List<Long> movieIds) {
+        this.movieIds = movieIds;
+    }
+
+    public MovieChoiceRequestDto() {
+    }
 }

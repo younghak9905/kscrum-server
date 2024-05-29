@@ -3,7 +3,9 @@ package com.example.demo.repository;
 import com.example.demo.domain.entity.Genre;
 import com.example.demo.domain.entity.Movie;
 import com.example.demo.domain.entity.MovieGenre;
+import com.example.demo.service.MovieService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -42,7 +44,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             "FUNCTION('RAND')")
     Page<Movie> findAllSortedByPriorityAndUpdateDate(Pageable pageable);
 
-    @Query("SELECT m FROM Movie m WHERE m.genres = :genre ORDER BY m.priority DESC NULLS LAST, m.updateDate DESC NULLS LAST")
+    @Query("SELECT m FROM Movie m WHERE m.genres LIKE %:genre% ORDER BY m.priority DESC NULLS LAST, m.updateDate DESC NULLS LAST")
     Page<Movie> findAllSortedByGenre(@Param("genre") String genre,Pageable pageable);
 
     @Query(value = "SELECT m FROM Movie m ORDER BY RAND() LIMIT 4", nativeQuery = true)
@@ -62,4 +64,10 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     @Query("SELECT m FROM Movie m WHERE m.priority IS NOT NULL or m.updateDate IS NOT NULL")
     List<Movie> findPriorityIsNotNull();
+
+    Page<Movie> findAllByKorTitleContaining(String keyword, Pageable pageable);
+
+    //Movie의 가장 마지막 번호
+    @Query("SELECT m FROM Movie m WHERE m.movieId = (SELECT MAX(m.movieId) FROM Movie m)")
+    Movie findFirstByOrderByMovieIdDesc();
 }

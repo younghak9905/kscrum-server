@@ -26,4 +26,6 @@ public interface SelectedMoviesRepository extends JpaRepository<SelectedMovies, 
     List<SelectedMovies> findAllById(Long id);
 
     boolean existsByMovie(Movie movie);
+
+    SelectedMovies findByMovieId(Movie movie);
 }

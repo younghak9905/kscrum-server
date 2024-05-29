@@ -39,6 +39,7 @@ public class MovieLikeService {
             try {
                 LikeMovie likeddMovie = new LikeMovie();
                 likeddMovie.setMovie(findMovie.get());
+                likeddMovie.setOffset(false);
                 likeMovieRepository.save(likeddMovie);
                // recommandService.choiceMovie(findMovie.get());
 

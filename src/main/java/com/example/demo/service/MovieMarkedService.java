@@ -25,6 +25,9 @@ private final MarkedMovieRepository markedMovieRepository;
         if (findMovie.isPresent()) {
             try {
                 MarkedMovie markedMovie = new MarkedMovie();
+                if(markedMovieRepository.existsByMovie(findMovie.get())){
+                    throw new IllegalArgumentException("Movie with ID " + movieId + " already marked.");
+                }
                 markedMovie.setMovie(findMovie.get());
                 markedMovieRepository.save(markedMovie);
             } catch (Exception e) {

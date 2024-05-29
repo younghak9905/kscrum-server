@@ -193,9 +193,9 @@ public class MovieService {
             System.out.println("findTmdbId: " + (System.currentTimeMillis() - startTime) + " ms");
             return link.get().getTmdbId();
         }
-        else if( selectedMoviesRepository.findByMovieId(movie)!=null)
+        else if(selectedMoviesRepository.findByMovie(movie)!=null)
         {
-            return selectedMoviesRepository.findByMovieId(movie).getId();
+            return selectedMoviesRepository.findByMovie(movie).get().getId();
         }
 
 

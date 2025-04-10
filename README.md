@@ -26,8 +26,7 @@
 ---
 
 ### 소프트웨어 구성도 🏗️
-
-![MovieStagram 시스템 아키텍처](./docs/images/architecture.svg)
+![MovieStagram 시스템 아키텍처](./docs/images/architecture.png)
 
 #### 시스템 구성
 - **프론트엔드 서버**: Vue.JS 기반 웹 애플리케이션
